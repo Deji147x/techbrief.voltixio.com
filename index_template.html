@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tech Brief – AI-Powered Tech News, Updated Hourly</title>
+<meta name="description" content="Tech Brief delivers AI-rewritten, plagiarism-free tech news across AI, Cybersecurity, Startups, Big Tech, Gadgets and Space. Updated every hour.">
+<meta name="keywords" content="tech news, AI news, cybersecurity, startups, artificial intelligence, technology, machine learning">
+<meta name="author" content="Tech Brief – Voltixio">
+<meta property="og:title" content="Tech Brief – AI-Powered Tech News">
+<meta property="og:description" content="Hourly AI-rewritten tech news. No plagiarism. Just original insights.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://techbrief.voltixio.com">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tech Brief – AI-Powered Tech News">
+<link rel="canonical" href="https://techbrief.voltixio.com">
+<link rel="alternate" type="application/rss+xml" title="Tech Brief RSS" href="https://techbrief.voltixio.com/feed.xml">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DHCN454V9J"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-DHCN454V9J');</script>
+<!-- Schema.org -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Tech Brief","url":"https://techbrief.voltixio.com","logo":"https://techbrief.voltixio.com/images/logo.png","contactPoint":{"@type":"ContactPoint","email":"voltixio_editor@voltixio.com","contactType":"editorial"}}</script>
+<style>
+:root{
+  --navy:#060c1a;
+  --navy2:#0d1526;
+  --navy3:#111d33;
+  --blue:#0a84ff;
+  --blue2:#00c6ff;
+  --silver:#a8bcd4;
+  --silver2:#cdd9e8;
+  --white:#e8f0fc;
+  --glow:rgba(10,132,255,.35);
+  --glow2:rgba(0,198,255,.2);
+  --border:rgba(10,132,255,.22);
+  --border2:rgba(168,188,212,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* ── TICKER ── */
+.ticker-wrap{background:#000d1f;border-bottom:1px solid var(--border);padding:7px 0;overflow:hidden;position:relative;}
+.ticker-wrap::before{content:'⚡ BREAKING';position:absolute;left:0;top:0;bottom:0;background:var(--blue);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.1em;padding:0 16px;display:flex;align-items:center;z-index:2;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%);}
+.ticker-track{display:flex;animation:ticker 45s linear infinite;width:max-content;padding-left:160px;}
+.ticker-track span{white-space:nowrap;font-size:.78rem;color:var(--silver2);margin-right:60px;}
+.ticker-track span::before{content:'//';color:var(--blue);margin-right:10px;font-weight:700;}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* ── HEADER ── */
+header{background:var(--navy2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.header-inner{max-width:1320px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:24px;height:64px;}
+.logo{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.logo-mark{width:40px;height:40px;background:linear-gradient(135deg,#0a2045,#0d1a35);border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 16px var(--glow);}
+.logo-mark svg{width:26px;height:26px;}
+.logo-text{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;color:var(--white);}
+.logo-text span{color:var(--blue2);}
+nav{display:flex;align-items:center;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+nav a{color:var(--silver);font-size:.82rem;font-weight:500;padding:6px 13px;border-radius:6px;white-space:nowrap;transition:all .18s;}
+nav a:hover,nav a.active{color:var(--white);background:rgba(10,132,255,.15);}
+.header-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.search-wrap{position:relative;}
+.search-wrap input{background:var(--navy3);border:1px solid var(--border2);color:var(--white);font-size:.82rem;padding:7px 36px 7px 12px;border-radius:8px;width:190px;outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--blue);}
+.search-wrap input::placeholder{color:var(--silver);}
+.search-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--silver);font-size:.85rem;pointer-events:none;}
+.btn-subscribe{background:var(--blue);color:#fff;font-size:.78rem;font-weight:700;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;letter-spacing:.03em;transition:background .2s,box-shadow .2s;}
+.btn-subscribe:hover{background:#0070dd;box-shadow:0 0 18px var(--glow);}
+
+/* ── HERO ── */
+.hero{max-width:1320px;margin:32px auto 0;padding:0 24px;}
+.hero-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;}
+
+/* Live trending panel */
+.hero-main{position:relative;border-radius:14px;overflow:hidden;min-height:420px;background:var(--navy2);border:1px solid var(--border);}
+.hero-live-bg{position:absolute;inset:0;background:
+  linear-gradient(rgba(10,132,255,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(10,132,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;animation:gridShift 20s linear infinite;}
+@keyframes gridShift{0%{background-position:0 0;}100%{background-position:40px 40px;}}
+.hero-live-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:400px;
+  background:radial-gradient(ellipse,rgba(10,132,255,.14) 0%,transparent 65%);pointer-events:none;}
+.hero-live-inner{position:relative;z-index:2;height:100%;padding:28px 32px;display:flex;flex-direction:column;}
+.hero-live-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.hero-live-title{display:flex;align-items:center;gap:10px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.3);
+  color:#ff5555;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;padding:4px 12px;border-radius:4px;}
+.live-dot2{width:7px;height:7px;background:#ff4444;border-radius:50%;animation:pulse2 1.2s infinite;}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,.5);}50%{box-shadow:0 0 0 6px rgba(255,68,68,0);}}
+.hero-live-label{font-size:1rem;font-weight:800;color:var(--silver2);letter-spacing:.04em;text-transform:uppercase;}
+.hero-ts{font-size:.75rem;color:var(--silver);font-variant-numeric:tabular-nums;}
+
+/* Trending slots */
+.trending-list{flex:1;display:flex;flex-direction:column;gap:0;}
+.trend-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(10,132,255,.1);
+  cursor:pointer;transition:background .15s;border-radius:6px;}
+.trend-item:last-child{border-bottom:none;}
+.trend-item:hover{background:rgba(10,132,255,.06);}
+.trend-num{font-size:1.4rem;font-weight:900;color:rgba(10,132,255,.25);min-width:32px;line-height:1;padding-top:2px;font-variant-numeric:tabular-nums;}
+.trend-item.rank1 .trend-num{color:rgba(10,132,255,.6);}
+.trend-item.rank2 .trend-num{color:rgba(10,132,255,.4);}
+.trend-body{flex:1;}
+.trend-cat{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue2);margin-bottom:5px;}
+.trend-title{font-size:.97rem;font-weight:700;color:var(--silver2);line-height:1.4;margin-bottom:5px;}
+.trend-meta{display:flex;align-items:center;gap:10px;font-size:.72rem;color:var(--silver);}
+.trend-new{background:rgba(10,132,255,.2);color:var(--blue2);font-size:.6rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;padding:2px 7px;border-radius:3px;}
+.trend-heat{display:flex;gap:2px;align-items:center;}
+.trend-heat span{display:inline-block;width:3px;border-radius:2px;background:var(--blue);}
+
+/* Progress bar */
+.hero-progress{height:2px;background:rgba(10,132,255,.15);border-radius:1px;margin-top:16px;overflow:hidden;}
+.hero-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue2));border-radius:1px;
+  width:0%;transition:width .1s linear;}
+
+.hero-cat{display:inline-block;background:var(--blue);color:#fff;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:3px 12px;border-radius:4px;margin-bottom:12px;}
+.hero-title{font-size:1.9rem;font-weight:800;line-height:1.2;color:#fff;margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,.6);}
+.hero-meta{font-size:.78rem;color:rgba(200,220,255,.7);}
+.hero-side{display:flex;flex-direction:column;gap:14px;}
+.side-card{background:var(--navy3);border:1px solid var(--border2);border-radius:10px;overflow:hidden;display:flex;gap:0;flex-direction:column;transition:border-color .2s;}
+.side-card:hover{border-color:var(--border);}
+.side-card{border-left:3px solid var(--border);border-left-color:rgba(10,132,255,.3);}
+.side-card-body{padding:14px;}
+.side-cat{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue2);margin-bottom:6px;}
+.side-title{font-size:.9rem;font-weight:700;color:var(--silver2);line-height:1.35;}
+.side-meta{font-size:.72rem;color:var(--silver);margin-top:6px;}
+
+/* ── SECTION HEADER ── */
+.section-hd{max-width:1320px;margin:44px auto 0;padding:0 24px;display:flex;align-items:center;justify-content:space-between;}
+.section-hd h2{font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--silver2);display:flex;align-items:center;gap:10px;}
+.section-hd h2::before{content:'';display:inline-block;width:3px;height:18px;background:linear-gradient(var(--blue),var(--blue2));border-radius:2px;}
+.see-all{font-size:.78rem;color:var(--blue2);font-weight:600;}
+
+/* ── CAT TABS ── */
+.cat-tabs{max-width:1320px;margin:18px auto 0;padding:0 24px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tab{background:var(--navy3);border:1px solid var(--border2);color:var(--silver);font-size:.78rem;font-weight:600;padding:6px 16px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:all .18s;}
+.cat-tab:hover,.cat-tab.active{background:rgba(10,132,255,.18);border-color:var(--blue);color:var(--white);}
+
+/* ── ARTICLE GRID ── */
+.grid-wrap{max-width:1320px;margin:20px auto 0;padding:0 24px 50px;}
+.article-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.art-card{background:var(--navy2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .2s;}
+.art-card:hover{border-color:var(--border);transform:translateY(-3px);}
+.art-img{position:relative;height:190px;overflow:hidden;}
+.art-img img{width:100%;height:100%;object-fit:cover;opacity:.8;transition:transform .4s,opacity .3s;}
+.art-card:hover .art-img img{transform:scale(1.04);opacity:.9;}
+.art-img-overlay{position:absolute;bottom:0;left:0;right:0;padding:28px 14px 12px;background:linear-gradient(to top,rgba(6,12,26,.9),transparent);}
+.art-cat{display:inline-block;background:rgba(10,132,255,.85);color:#fff;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:2px 9px;border-radius:3px;}
+.art-body{padding:16px 18px 20px;}
+.art-title{font-size:.98rem;font-weight:700;color:var(--silver2);line-height:1.4;margin-bottom:8px;}
+.art-title a:hover{color:var(--blue2);}
+.art-excerpt{font-size:.82rem;color:var(--silver);line-height:1.6;margin-bottom:12px;}
+.art-footer{display:flex;align-items:center;justify-content:space-between;}
+.art-meta{font-size:.72rem;color:rgba(168,188,212,.6);}
+.art-read{font-size:.75rem;font-weight:700;color:var(--blue2);}
+.art-read:hover{color:#fff;}
+
+/* ── LIVE PULSE ── */
+.live-section{max-width:1320px;margin:0 auto 50px;padding:0 24px;}
+.live-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.live-dot{width:8px;height:8px;background:#ff3b3b;border-radius:50%;box-shadow:0 0 8px #ff3b3b;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px #ff3b3b;}50%{box-shadow:0 0 16px #ff3b3b,0 0 28px rgba(255,59,59,.4);}}
+.live-header h2{font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;}
+.live-items{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border2);border-radius:12px;overflow:hidden;}
+.live-item{background:var(--navy2);padding:16px 20px;display:flex;align-items:flex-start;gap:16px;transition:background .18s;}
+.live-item:hover{background:var(--navy3);}
+.live-time{font-size:.72rem;color:var(--blue2);font-weight:700;white-space:nowrap;padding-top:2px;min-width:50px;}
+.live-content h3{font-size:.9rem;font-weight:700;color:var(--silver2);margin-bottom:4px;}
+.live-content p{font-size:.8rem;color:var(--silver);}
+.live-item-cat{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin-top:4px;}
+
+/* ── CTA SECTION ── */
+.cta-section{background:linear-gradient(135deg,var(--navy2) 0%,#0a1628 100%);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 24px;text-align:center;position:relative;overflow:hidden;}
+.cta-section::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:300px;background:radial-gradient(ellipse,rgba(10,132,255,.12) 0%,transparent 70%);pointer-events:none;}
+.cta-inner{max-width:560px;margin:0 auto;position:relative;}
+.cta-badge{display:inline-block;background:rgba(10,132,255,.15);border:1px solid var(--border);color:var(--blue2);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;padding:5px 16px;border-radius:20px;margin-bottom:18px;}
+.cta-section h2{font-size:2rem;font-weight:800;margin-bottom:12px;line-height:1.2;}
+.cta-section p{color:var(--silver);font-size:.95rem;margin-bottom:28px;}
+.cta-form{display:flex;gap:10px;max-width:420px;margin:0 auto 16px;}
+.cta-form input{flex:1;background:var(--navy3);border:1px solid var(--border);color:var(--white);padding:11px 16px;border-radius:8px;font-size:.9rem;outline:none;transition:border-color .2s;}
+.cta-form input:focus{border-color:var(--blue);}
+.cta-form input::placeholder{color:var(--silver);}
+.cta-form button{background:var(--blue);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s,box-shadow .2s;white-space:nowrap;}
+.cta-form button:hover{background:#0070dd;box-shadow:0 0 20px var(--glow);}
+.cta-note{font-size:.73rem;color:var(--silver);opacity:.7;}
+
+/* ── ABOUT STRIP ── */
+.about-strip{max-width:1320px;margin:60px auto;padding:0 24px;}
+.about-card{background:var(--navy2);border:1px solid var(--border2);border-radius:14px;padding:36px 40px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
+.about-card h2{font-size:1.5rem;font-weight:800;margin-bottom:12px;color:var(--white);}
+.about-card h2 span{color:var(--blue2);}
+.about-card p{color:var(--silver);font-size:.9rem;line-height:1.75;margin-bottom:12px;}
+.about-card a{color:var(--blue2);font-weight:600;}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.stat{background:var(--navy3);border:1px solid var(--border2);border-radius:10px;padding:20px;text-align:center;}
+.stat-num{font-size:1.8rem;font-weight:800;color:var(--blue2);display:block;}
+.stat-label{font-size:.75rem;color:var(--silver);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+
+/* ── CONTACT ── */
+.contact-section{background:var(--navy2);border-top:1px solid var(--border2);padding:60px 24px;}
+.contact-inner{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;}
+.contact-col h3{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--silver2);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border2);}
+.contact-col p,.contact-col a{font-size:.85rem;color:var(--silver);line-height:1.9;display:block;}
+.contact-col a:hover{color:var(--blue2);}
+.contact-col .highlight{color:var(--blue2);font-weight:600;}
+.contact-form input,.contact-form textarea{width:100%;background:var(--navy3);border:1px solid var(--border2);color:var(--white);padding:10px 14px;border-radius:8px;font-size:.83rem;margin-bottom:10px;outline:none;font-family:inherit;transition:border-color .2s;}
+.contact-form input:focus,.contact-form textarea:focus{border-color:var(--blue);}
+.contact-form input::placeholder,.contact-form textarea::placeholder{color:var(--silver);}
+.contact-form textarea{height:80px;resize:none;}
+.contact-form button{width:100%;background:var(--blue);color:#fff;border:none;padding:10px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:background .2s;}
+.contact-form button:hover{background:#0070dd;}
+
+/* ── FOOTER ── */
+footer{background:#030810;border-top:1px solid var(--border2);padding:40px 24px 24px;}
+.footer-inner{max-width:1320px;margin:0 auto;}
+.footer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:32px;margin-bottom:32px;flex-wrap:wrap;}
+.footer-brand .logo-text{font-size:1.1rem;}
+.footer-brand p{color:var(--silver);font-size:.8rem;margin-top:8px;max-width:260px;line-height:1.65;}
+.footer-links{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.footer-col h4{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--silver2);margin-bottom:12px;}
+.footer-col a{display:block;font-size:.8rem;color:var(--silver);margin-bottom:7px;}
+.footer-col a:hover{color:var(--blue2);}
+.footer-bottom{border-top:1px solid var(--border2);padding-top:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-bottom p{font-size:.75rem;color:rgba(168,188,212,.5);}
+.footer-legal a{font-size:.75rem;color:rgba(168,188,212,.5);margin-left:18px;}
+.footer-legal a:hover{color:var(--blue2);}
+
+/* ── SEARCH OVERLAY ── */
+#search-results-panel{display:none;position:absolute;top:calc(100% + 6px);right:0;width:340px;background:var(--navy2);border:1px solid var(--border);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.6);z-index:200;max-height:400px;overflow-y:auto;}
+.search-wrap{position:relative;}
+.sr-item{padding:12px 16px;border-bottom:1px solid var(--border2);cursor:pointer;}
+.sr-item:hover{background:var(--navy3);}
+.sr-item h4{font-size:.83rem;font-weight:700;color:var(--silver2);margin-bottom:3px;}
+.sr-item p{font-size:.73rem;color:var(--silver);}
+.sr-cat{font-size:.62rem;color:var(--blue2);text-transform:uppercase;font-weight:700;margin-top:4px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;}
+  .hero-side{flex-direction:row;overflow-x:auto;}
+  .side-card{min-width:220px;}
+  .article-grid{grid-template-columns:1fr 1fr;}
+  .about-card{grid-template-columns:1fr;}
+  .contact-inner{grid-template-columns:1fr;}
+  .footer-links{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .header-inner{gap:12px;}
+  .search-wrap input{width:130px;}
+  .btn-subscribe{display:none;}
+  .article-grid{grid-template-columns:1fr;}
+  .cta-form{flex-direction:column;}
+  .hero-title{font-size:1.4rem;}
+  .footer-links{grid-template-columns:1fr;}
+  .footer-top{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- BREAKING NEWS TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker">
+    <span>OpenAI unveils real-time reasoning model for enterprise deployments</span>
+    <span>Google's new TPU v6 outperforms Nvidia H100 in inference benchmarks</span>
+    <span>Critical zero-day vulnerability discovered in widely-used cloud infrastructure</span>
+    <span>London AI startup raises $200M Series B at $1.8B valuation</span>
+    <span>SpaceX Starship completes first fully reusable orbital round trip</span>
+    <span>Apple Vision Pro 2 leaked specs: 40% lighter, $2,499 price point</span>
+    <span>OpenAI unveils real-time reasoning model for enterprise deployments</span>
+    <span>Google's new TPU v6 outperforms Nvidia H100 in inference benchmarks</span>
+    <span>Critical zero-day vulnerability discovered in widely-used cloud infrastructure</span>
+    <span>London AI startup raises $200M Series B at $1.8B valuation</span>
+    <span>SpaceX Starship completes first fully reusable orbital round trip</span>
+    <span>Apple Vision Pro 2 leaked specs: 40% lighter, $2,499 price point</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-mark">
+        <!-- Real logo — swap in once logo.png is on server -->
+        <img src="/images/logo.png" alt="Tech Brief"
+             style="width:40px;height:40px;object-fit:contain;border-radius:7px;"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <!-- SVG fallback (exact replica of uploaded logo) -->
+        <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" style="display:none;width:40px;height:40px;">
+          <defs>
+            <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0a1628"/>
+              <stop offset="100%" stop-color="#060c18"/>
+            </linearGradient>
+            <linearGradient id="silverGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d8e8f8"/>
+              <stop offset="40%" stop-color="#a0b8d0"/>
+              <stop offset="100%" stop-color="#607898"/>
+            </linearGradient>
+            <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#40d0ff"/>
+              <stop offset="100%" stop-color="#0a70ff"/>
+            </linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="1.2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Background -->
+          <rect width="44" height="44" rx="8" fill="url(#bgGrad)" stroke="#1a3060" stroke-width="1"/>
+          <!-- T letter -->
+          <rect x="7" y="10" width="14" height="3" rx="1" fill="url(#silverGrad)"/>
+          <rect x="12.5" y="13" width="3" height="14" rx="1" fill="url(#silverGrad)"/>
+          <!-- B letter -->
+          <rect x="23" y="10" width="3" height="17" rx="1" fill="url(#silverGrad)"/>
+          <path d="M26 10 Q33 10 33 15 Q33 18.5 26 18.5 Q33 18.5 33 23.5 Q33 27 26 27 Z" fill="url(#silverGrad)"/>
+          <!-- Lightning bolt overlay -->
+          <path d="M27 6 L19 22 L23 22 L16 38 L26 20 L22 20 Z" fill="url(#boltGrad)" filter="url(#glow)" opacity=".95"/>
+        </svg>
+      </div>
+      <span class="logo-text">Tech<span>Brief</span></span>
+    </a>
+    <nav>
+      <a href="#" class="active" id="nav-home" onclick="navFilter(this,'all');return false;">Home</a>
+      <a href="#" id="nav-ai"       onclick="navFilter(this,'ai');return false;">AI & ML</a>
+      <a href="#" id="nav-cyber"    onclick="navFilter(this,'cyber');return false;">Cybersecurity</a>
+      <a href="#" id="nav-startups" onclick="navFilter(this,'startups');return false;">Startups</a>
+      <a href="#" id="nav-bigtech"  onclick="navFilter(this,'bigtech');return false;">Big Tech</a>
+      <a href="#" id="nav-gadgets"  onclick="navFilter(this,'gadgets');return false;">Gadgets</a>
+      <a href="#" id="nav-space"    onclick="navFilter(this,'space');return false;">Space</a>
+      <a href="/about.html">About</a>
+    </nav>
+    <div class="header-actions">
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search articles…" autocomplete="off">
+        <span class="search-icon">⌕</span>
+        <div id="search-results-panel"></div>
+      </div>
+      <button class="btn-subscribe" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Subscribe</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO BANNER IMAGE -->
+<div style="width:100%;position:relative;display:block;line-height:0;">
+  <img src="/images/hero-banner.jpg"
+       alt="Trending Technology News – Real Time, Real News"
+       style="width:100%;height:auto;display:block;max-height:420px;object-fit:cover;object-position:center top;"
+       onerror="this.parentElement.style.display='none'">
+  <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(6,12,26,.25) 0%,transparent 25%,transparent 75%,rgba(6,12,26,.25) 100%);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,#060c1a 0%,transparent 100%);pointer-events:none;"></div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid">
+
+    <!-- LEFT: Live Trending Panel -->
+    <div class="hero-main">
+      <div class="hero-live-bg"></div>
+      <div class="hero-live-glow"></div>
+      <div class="hero-live-inner">
+        <div class="hero-live-header">
+          <div class="hero-live-title">
+            <div class="live-badge"><div class="live-dot2"></div>Live</div>
+            <span class="hero-live-label">Trending Technology News</span>
+          </div>
+          <span class="hero-ts" id="live-clock"></span>
+        </div>
+        <div class="trending-list" id="trending-list"></div>
+        <div class="hero-progress"><div class="hero-progress-bar" id="hero-progress-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Top Stories -->
+    <div class="hero-side" id="hero-side-cards"></div>
+
+  </div>
+</div>
+
+<!-- SECTION: LATEST -->
+<div class="section-hd"><h2>Latest Stories</h2><a href="#" class="see-all">View all →</a></div>
+<div class="cat-tabs">
+  <div class="cat-tab active" onclick="filterCat(this,'all')">All</div>
+  <div class="cat-tab" onclick="filterCat(this,'ai')">AI & ML</div>
+  <div class="cat-tab" onclick="filterCat(this,'cyber')">Cybersecurity</div>
+  <div class="cat-tab" onclick="filterCat(this,'startups')">Startups & VC</div>
+  <div class="cat-tab" onclick="filterCat(this,'bigtech')">Big Tech</div>
+  <div class="cat-tab" onclick="filterCat(this,'gadgets')">Gadgets</div>
+  <div class="cat-tab" onclick="filterCat(this,'space')">Space & Science</div>
+</div>
+<div class="grid-wrap">
+  <div class="article-grid" id="article-grid">
+
+    <div class="art-card" data-cat="bigtech">
+      <div class="art-img">
+        <img src="https://picsum.photos/id/96/600/380" alt="">
+        <div class="art-img-overlay"><span class="art-cat">Big Tech</span></div>
+      </div>
+      <div class="art-body">
+        <div class="art-title"><a href="/article/5">Apple Vision Pro 2 Leaks Point to 40% Lighter Design and $2,499 Price Tag</a></div>
+        <div class="art-excerpt">Supply chain documents suggest Apple's next spatial computer will be lighter, cheaper, and far more capable than the original — with a new micro-OLED sourced from a different manufacturer.</div>
+        <div class="art-footer"><span class="art-meta">5 hours ago</span><a href="/article/5" class="art-read">Read →</a></div>
+      </div>
+    </div>
+
+    <div class="art-card" data-cat="space">
+      <div class="art-img">
+        <img src="https://picsum.photos/id/1060/600/380" alt="">
+        <div class="art-img-overlay"><span class="art-cat">Space & Science</span></div>
+      </div>
+      <div class="art-body">
+        <div class="art-title"><a href="/article/6">SpaceX Starship Completes First Fully Reusable Round Trip to Orbit</a></div>
+        <div class="art-excerpt">In a historic milestone for commercial spaceflight, Starship launched, deployed payload, re-entered the atmosphere, and landed intact — all without replacing a single component.</div>
+        <div class="art-footer"><span class="art-meta">6 hours ago</span><a href="/article/6" class="art-read">Read →</a></div>
+      </div>
+    </div>
+
+    <div class="art-card" data-cat="ai">
+      <div class="art-img">
+        <img src="https://picsum.photos/id/20/600/380" alt="">
+        <div class="art-img-overlay"><span class="art-cat">AI & ML</span></div>
+      </div>
+      <div class="art-body">
+        <div class="art-title"><a href="/article/7">Anthropic's Claude 4 Scores 97% on Bar Exam — Outperforming 99% of Human Lawyers</a></div>
+        <div class="art-excerpt">Anthropic's latest model has shattered legal reasoning benchmarks, achieving near-perfect scores on multistate bar examination simulations and multi-step case analysis tasks.</div>
+        <div class="art-footer"><span class="art-meta">7 hours ago</span><a href="/article/7" class="art-read">Read →</a></div>
+      </div>
+    </div>
+
+    <div class="art-card" data-cat="gadgets">
+      <div class="art-img">
+        <img src="https://picsum.photos/id/160/600/380" alt="">
+        <div class="art-img-overlay"><span class="art-cat">Gadgets & Hardware</span></div>
+      </div>
+      <div class="art-body">
+        <div class="art-title"><a href="/article/8">Samsung's Galaxy Ring 2 Now Tracks Blood Pressure Without a Cuff</a></div>
+        <div class="art-excerpt">Samsung's second-generation smart ring introduces cuffless blood pressure monitoring cleared by FDA, setting a new benchmark for non-invasive consumer health tracking devices.</div>
+        <div class="art-footer"><span class="art-meta">8 hours ago</span><a href="/article/8" class="art-read">Read →</a></div>
+      </div>
+    </div>
+
+    <div class="art-card" data-cat="startups">
+      <div class="art-img">
+        <img src="https://picsum.photos/id/42/600/380" alt="">
+        <div class="art-img-overlay"><span class="art-cat">Startups & VC</span></div>
+      </div>
+      <div class="art-body">
+        <div class="art-title"><a href="/article/9">Y Combinator's Summer 2026 Batch Has More AI Infrastructure Startups Than Ever</a></div>
+        <div class="art-excerpt">Over 68% of YC's newest cohort is building foundational AI tooling — from vector databases and inference optimization to multi-agent workflow orchestration platforms.</div>
+        <div class="art-footer"><span class="art-meta">9 hours ago</span><a href="/article/9" class="art-read">Read →</a></div>
+      </div>
+    </div>
+
+    <div class="art-card" data-cat="cyber">
+      <div class="art-img">
+        <img src="https://picsum.photos/id/230/600/380" alt="">
+        <div class="art-img-overlay"><span class="art-cat">Cybersecurity</span></div>
+      </div>
+      <div class="art-body">
+        <div class="art-title"><a href="/article/10">Nation-State Hackers Exploiting AI to Generate Phishing Emails at Scale</a></div>
+        <div class="art-excerpt">Security researchers have documented a 400% increase in AI-generated spear phishing attacks attributed to nation-state threat actors targeting financial institutions and critical infrastructure.</div>
+        <div class="art-footer"><span class="art-meta">10 hours ago</span><a href="/article/10" class="art-read">Read →</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LIVE UPDATES -->
+<div class="section-hd" style="margin-bottom:18px;"><h2><span style="color:#ff3b3b;margin-right:4px;">●</span> Live Updates</h2></div>
+<div class="live-section">
+  <div class="live-items">
+    <div class="live-item">
+      <div class="live-time">NOW</div>
+      <div class="live-content">
+        <h3>Meta announces 100B parameter open-source model available for free download</h3>
+        <p>Llama 4 Ultra drops without warning — researchers scramble to benchmark against GPT-5.</p>
+        <div class="live-item-cat">AI & ML</div>
+      </div>
+    </div>
+    <div class="live-item">
+      <div class="live-time">14m</div>
+      <div class="live-content">
+        <h3>Microsoft's Recall feature quietly re-enabled in latest Windows update</h3>
+        <p>Privacy advocates raise alarm as screen-recording AI feature returns after 2025 controversy.</p>
+        <div class="live-item-cat">Big Tech</div>
+      </div>
+    </div>
+    <div class="live-item">
+      <div class="live-time">31m</div>
+      <div class="live-content">
+        <h3>Stripe valued at $91B after secondary share sale closes</h3>
+        <p>Payment processing giant inches closer to long-rumoured IPO as secondary market activity surges.</p>
+        <div class="live-item-cat">Startups & VC</div>
+      </div>
+    </div>
+    <div class="live-item">
+      <div class="live-time">52m</div>
+      <div class="live-content">
+        <h3>CISA issues emergency directive for critical infrastructure operators</h3>
+        <p>Federal agency warns of active exploitation of recently-disclosed industrial control system vulnerability.</p>
+        <div class="live-item-cat">Cybersecurity</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section" id="cta">
+  <div class="cta-inner">
+    <div class="cta-badge">Free Newsletter</div>
+    <h2>Stay Ahead of the<br>Technology Curve</h2>
+    <p>Get the top 5 AI-rewritten tech stories delivered to your inbox every morning. No spam. Unsubscribe anytime.</p>
+    <form class="cta-form" onsubmit="subscribeCTA(event)">
+      <input type="email" id="cta-email" placeholder="Your email address" required>
+      <button type="submit">Subscribe Free →</button>
+    </form>
+    <p class="cta-note">Join thousands of engineers, founders and tech enthusiasts. Powered by Voltixio.</p>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="about-strip" id="about">
+  <div class="about-card">
+    <div>
+      <h2>About <span>Tech Brief</span></h2>
+      <p>Tech Brief is an AI-powered news intelligence platform built by <a href="https://voltixio.com" target="_blank" rel="noopener">Voltixio</a>. Every hour, our pipeline aggregates the most important tech stories from 40+ premium sources, then uses a local large language model to rewrite each article into a unique, original piece — plagiarism-free and ready to read.</p>
+      <p>We cover AI & Machine Learning, Cybersecurity, Startups & VC, Big Tech, Gadgets & Hardware, and Space & Science. No tracking. No ads serving third-party data. No cookies beyond analytics.</p>
+      <p style="margin-top:16px;"><a href="https://voltixio.com" target="_blank" rel="noopener">Visit Voltixio.com →</a></p>
+    </div>
+    <div class="about-stats">
+      <div class="stat"><span class="stat-num">40+</span><div class="stat-label">Source feeds</div></div>
+      <div class="stat"><span class="stat-num">24/7</span><div class="stat-label">Live updates</div></div>
+      <div class="stat"><span class="stat-num">100%</span><div class="stat-label">AI rewritten</div></div>
+      <div class="stat"><span class="stat-num">0</span><div class="stat-label">Plagiarism</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="contact-section" id="contact">
+  <div class="contact-inner">
+    <div class="contact-col">
+      <h3>Contact Us</h3>
+      <p>For editorial enquiries, corrections, partnerships or press:</p>
+      <br>
+      <a href="mailto:voltixio_editor@voltixio.com" class="highlight">voltixio_editor@voltixio.com</a>
+      <a href="tel:4438531405">(443) 853-1405</a>
+      <p style="margin-top:12px;">Windsor Ave<br>Baltimore, MD 21216</p>
+      <br>
+      <p style="font-size:.78rem;color:rgba(168,188,212,.5);">We respond within 48 hours.</p>
+    </div>
+    <div class="contact-col">
+      <h3>Quick Enquiry</h3>
+      <form class="contact-form" onsubmit="sendEnquiry(event)">
+        <input type="text" id="c-name" placeholder="Your name" required>
+        <input type="email" id="c-email" placeholder="Email address" required>
+        <input type="text" id="c-subject" placeholder="Subject">
+        <textarea id="c-msg" placeholder="Your message…"></textarea>
+        <button type="submit">Send Message →</button>
+      </form>
+    </div>
+    <div class="contact-col">
+      <h3>Explore</h3>
+      <a href="/">Home</a>
+      <a href="/search.html">Search Articles</a>
+      <a href="/category/ai-machine-learning.html">AI & Machine Learning</a>
+      <a href="/category/cybersecurity.html">Cybersecurity</a>
+      <a href="/category/startups-vc.html">Startups & VC</a>
+      <a href="/feed.xml">RSS Feed</a>
+      <br>
+      <h3 style="margin-top:20px;">Legal</h3>
+      <a href="https://learnai.voltixio.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>
+      <a href="https://learnai.voltixio.com/tos" target="_blank" rel="noopener">Terms of Service</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo-text">Tech<span style="color:var(--blue2);">Brief</span></div>
+        <p>AI-rewritten tech news, updated hourly. Built by <a href="https://voltixio.com" style="color:var(--blue2);">Voltixio</a>. Windsor Ave, Baltimore MD 21216.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Categories</h4>
+          <a href="/category/ai-machine-learning.html">AI & ML</a>
+          <a href="/category/cybersecurity.html">Cybersecurity</a>
+          <a href="/category/startups-vc.html">Startups & VC</a>
+          <a href="/category/big-tech.html">Big Tech</a>
+          <a href="/category/gadgets-hardware.html">Gadgets</a>
+          <a href="/category/space-science.html">Space & Science</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/about.html">About</a>
+          <a href="/contact.html">Contact</a>
+          <a href="https://voltixio.com" target="_blank">Voltixio</a>
+          <a href="/feed.xml">RSS Feed</a>
+          <a href="/sitemap.xml">Sitemap</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy Policy</a>
+          <a href="https://learnai.voltixio.com/tos" target="_blank">Terms of Service</a>
+          <a href="mailto:voltixio_editor@voltixio.com">Editorial Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Tech Brief – Voltixio. All AI-rewritten summaries are original. Sources attributed.</p>
+      <div class="footer-legal">
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms</a>
+        <a href="mailto:voltixio_editor@voltixio.com">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const ARTICLES = [
+  {id:'a1',title:'OpenAI Releases GPT-5 With Real-Time Reasoning Capabilities',excerpt:'A move that sent shockwaves through the AI industry.',cat:'AI & ML',url:'/article/1'},
+  {id:'a2',title:'Critical Zero-Day Found in Cloud Provider Infrastructure',excerpt:'Researchers uncover critical vulnerability affecting millions.',cat:'Cybersecurity',url:'/article/2'},
+  {id:'a3',title:'London AI Startup Raises $200M Series B at $1.8B Valuation',excerpt:'Vaulting into unicorn territory just 18 months after seed.',cat:'Startups & VC',url:'/article/3'},
+  {id:'a4',title:'Google\'s New Tensor Chip Outperforms Nvidia H100',excerpt:'3× improvement in inference throughput over predecessor.',cat:'Big Tech',url:'/article/4'},
+  {id:'a5',title:'Apple Vision Pro 2: 40% Lighter, $2,499 Price Tag',excerpt:'Supply chain documents confirm major redesign for 2026.',cat:'Big Tech',url:'/article/5'},
+  {id:'a6',title:'SpaceX Starship Completes Fully Reusable Round Trip',excerpt:'Historic milestone for commercial spaceflight.',cat:'Space & Science',url:'/article/6'},
+  {id:'a7',title:'Anthropic\'s Claude 4 Scores 97% on Bar Exam',excerpt:'Outperforming 99% of human lawyers in legal reasoning tests.',cat:'AI & ML',url:'/article/7'},
+  {id:'a8',title:'Samsung Galaxy Ring 2: Cuffless Blood Pressure Monitoring',excerpt:'FDA-cleared non-invasive health tracking in a smart ring.',cat:'Gadgets',url:'/article/8'},
+  {id:'a9',title:'YC Summer 2026: 68% AI Infrastructure Startups',excerpt:'Most AI-heavy cohort in Y Combinator\'s history.',cat:'Startups & VC',url:'/article/9'},
+  {id:'a10',title:'Nation-State Hackers Using AI for Phishing at Scale',excerpt:'400% increase in AI-generated spear phishing attacks.',cat:'Cybersecurity',url:'/article/10'},
+];
+
+// ── LIVE TRENDING ENGINE ─────────────────────────────────────────────────────
+const TRENDING = [
+  {rank:1,cat:'AI & ML',title:'OpenAI GPT-5 debuts real-time multi-step reasoning — benchmarks shatter previous records',age:'Just now',hot:5,url:'/article/1',isNew:true},
+  {rank:2,cat:'Cybersecurity',title:'Critical zero-day in cloud infrastructure puts millions of enterprise workloads at risk',age:'14 min ago',hot:4,url:'/article/2',isNew:true},
+  {rank:3,cat:'Startups & VC',title:'London AI startup raises $200M Series B at $1.8B valuation after just 18 months',age:'31 min ago',hot:4,url:'/article/3',isNew:false},
+  {rank:4,cat:'Big Tech',title:"Google's new Tensor chip outperforms Nvidia H100 in inference — by 3×",age:'52 min ago',hot:3,url:'/article/4',isNew:false},
+  {rank:5,cat:'Space & Science',title:'SpaceX Starship completes first fully reusable round trip to orbit without replacing any part',age:'1 hr ago',hot:3,url:'/article/6',isNew:false},
+];
+
+const SIDE_STORIES = [
+  {cat:'Big Tech',title:'Apple Vision Pro 2 leaks confirm 40% lighter design and $2,499 price tag',age:'5 hrs ago',url:'/article/5'},
+  {cat:'Gadgets',title:'Samsung Galaxy Ring 2 gains FDA-cleared cuffless blood pressure monitoring',age:'8 hrs ago',url:'/article/8'},
+  {cat:'AI & ML',title:"Anthropic's Claude 4 scores 97% on the Bar Exam, outperforming 99% of lawyers",age:'9 hrs ago',url:'/article/7'},
+];
+
+function heatBars(n){
+  let h='<div class="trend-heat">';
+  for(let i=0;i<5;i++) h+=`<span style="height:${6+i*3}px;opacity:${i<n?1:.2};"></span>`;
+  return h+'</div>';
+}
+
+function renderTrending(items){
+  const list=document.getElementById('trending-list');
+  list.innerHTML=items.map((t,i)=>`
+    <div class="trend-item rank${i+1}" onclick="location.href='${t.url}'">
+      <div class="trend-num">0${t.rank}</div>
+      <div class="trend-body">
+        <div class="trend-cat">${t.cat}</div>
+        <div class="trend-title">${t.title}</div>
+        <div class="trend-meta">
+          <span>${t.age}</span>
+          ${t.isNew?'<span class="trend-new">New</span>':''}
+          ${heatBars(t.hot)}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderSideCards(stories){
+  const side=document.getElementById('hero-side-cards');
+  side.innerHTML=stories.map(s=>`
+    <a href="${s.url}" class="side-card">
+      <div class="side-card-body" style="padding:16px 18px;">
+        <div class="side-cat">${s.cat}</div>
+        <div class="side-title">${s.title}</div>
+        <div class="side-meta">${s.age}</div>
+      </div>
+    </a>`).join('');
+}
+
+// Clock
+function updateClock(){
+  document.getElementById('live-clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// Progress bar cycles every 60s to simulate "next update in..."
+let progressStart=Date.now();
+const CYCLE_MS=60000;
+function updateProgress(){
+  const elapsed=(Date.now()-progressStart)%CYCLE_MS;
+  const pct=(elapsed/CYCLE_MS)*100;
+  document.getElementById('hero-progress-bar').style.width=pct+'%';
+  if(elapsed<100){
+    // Simulate a new article appearing at the top of the list
+    const fresh={rank:1,cat:'AI & ML',title:'Breaking: '+['New AI chip sets world speed record','EU passes landmark AI liability law','OpenAI acquires robotics startup for $1.2B','Google DeepMind merges research teams into single AGI division'][Math.floor(Math.random()*4)],age:'Just now',hot:5,url:'/article/1',isNew:true};
+    const updated=[fresh,...TRENDING.slice(0,4).map((t,i)=>({...t,rank:i+2,isNew:false}))];
+    renderTrending(updated);
+  }
+}
+
+renderTrending(TRENDING);
+renderSideCards(SIDE_STORIES);
+updateClock();
+setInterval(updateClock,1000);
+setInterval(updateProgress,200);
+
+// Category filter (called by cat-tab pills)
+function filterCat(el,cat){
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.art-card').forEach(c=>{
+    c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none';
+  });
+}
+
+// Nav filter (called by header nav links) — scrolls to articles + filters
+function navFilter(navEl, cat){
+  // Update active state on nav links
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  navEl.classList.add('active');
+  // Sync the cat-tab pills
+  const matchTab = Array.from(document.querySelectorAll('.cat-tab')).find(t=>{
+    const fn = t.getAttribute('onclick')||'';
+    return fn.includes("'"+cat+"'");
+  });
+  if(matchTab) filterCat(matchTab, cat);
+  // Scroll smoothly to the article grid
+  const grid = document.querySelector('.section-hd');
+  if(grid) grid.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// Search
+const searchInput=document.getElementById('search-input');
+const searchPanel=document.getElementById('search-results-panel');
+searchInput.addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase();
+  if(!q){searchPanel.style.display='none';return;}
+  const hits=ARTICLES.filter(a=>a.title.toLowerCase().includes(q)||a.cat.toLowerCase().includes(q));
+  if(!hits.length){searchPanel.innerHTML='<div style="padding:14px 16px;color:var(--silver);font-size:.82rem;">No results found.</div>';searchPanel.style.display='block';return;}
+  searchPanel.innerHTML=hits.slice(0,6).map(a=>`<div class="sr-item" onclick="location.href='${a.url}'"><h4>${a.title}</h4><p>${a.excerpt}</p><div class="sr-cat">${a.cat}</div></div>`).join('');
+  searchPanel.style.display='block';
+});
+document.addEventListener('click',function(e){if(!e.target.closest('.search-wrap'))searchPanel.style.display='none';});
+
+// CTA subscribe
+function subscribeCTA(e){
+  e.preventDefault();
+  const email=document.getElementById('cta-email').value;
+  const btn=e.target.querySelector('button');
+  btn.textContent='✓ Subscribed!';
+  btn.style.background='#1a8a4a';
+  setTimeout(()=>{btn.textContent='Subscribe Free →';btn.style.background='';},3000);
+  window.location.href='mailto:voltixio_editor@voltixio.com?subject=Newsletter Subscription&body=Subscribe: '+encodeURIComponent(email);
+}
+
+// Contact form
+function sendEnquiry(e){
+  e.preventDefault();
+  const name=document.getElementById('c-name').value;
+  const email=document.getElementById('c-email').value;
+  const subject=document.getElementById('c-subject').value||'General Enquiry';
+  const msg=document.getElementById('c-msg').value;
+  window.location.href='mailto:voltixio_editor@voltixio.com?subject='+encodeURIComponent(subject+' — from '+name)+'&body='+encodeURIComponent('From: '+name+'\nEmail: '+email+'\n\n'+msg);
+}
+</script>
+</body>
+</html>

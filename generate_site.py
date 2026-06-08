@@ -257,120 +257,343 @@ def parse_rss(cache: dict) -> list[dict]:
 
 # ── Shared CSS ────────────────────────────────────────────────────────────────
 SHARED_CSS = """
+:root {
+  --navy:   #060c1a;
+  --navy2:  #0d1526;
+  --navy3:  #111d33;
+  --navy4:  #162040;
+  --blue:   #0a84ff;
+  --blue2:  #00c6ff;
+  --cyan:   #00e5ff;
+  --glow:   rgba(0,198,255,.18);
+  --red:    #ff3b3b;
+  --silver: #a8bcd4;
+  --silver2:#cdd9e8;
+  --white:  #ffffff;
+}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-       background:#f5f7fa; color:#1a202c; line-height:1.6; }
+body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--navy); color:var(--silver2); line-height:1.6;
+}
 a { text-decoration:none; }
-.container { max-width:1200px; margin:0 auto; padding:0 20px; }
+.container { max-width:1240px; margin:0 auto; padding:0 24px; }
+
+/* ── Breaking News Ticker ── */
+.ticker-wrap {
+  background:linear-gradient(90deg,var(--red) 0%,#c0392b 100%);
+  padding:8px 0; overflow:hidden; position:relative; z-index:10;
+}
+.ticker-inner { display:flex; align-items:center; gap:0; }
+.ticker-label {
+  background:var(--white); color:var(--red); font-size:.72rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.1em; padding:3px 12px; white-space:nowrap;
+  margin-right:20px; flex-shrink:0; border-radius:2px;
+}
+.ticker-track {
+  overflow:hidden; flex:1;
+}
+.ticker-items {
+  display:inline-flex; gap:60px; white-space:nowrap;
+  animation:ticker 40s linear infinite;
+}
+.ticker-items span { color:var(--white); font-size:.82rem; font-weight:500; }
+.ticker-items span::before { content:"⚡ "; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
 /* ── Header ── */
-header { background:#1a202c; color:white; padding:16px 0; }
+header {
+  background:rgba(6,12,26,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(0,198,255,.15);
+  padding:14px 0;
+  position:sticky; top:0; z-index:100;
+}
 header .inner { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-header h1 { font-size:1.6rem; }
-header h1 a { color:white; }
-nav a { color:#a0aec0; margin-right:18px; font-size:.9rem; }
-nav a:hover { color:white; }
+.logo-wrap { display:flex; align-items:center; gap:10px; }
+.logo-wrap img { height:40px; width:40px; object-fit:contain; border-radius:8px; }
+.logo-text { font-size:1.3rem; font-weight:800; color:var(--white); letter-spacing:-.02em; }
+.logo-text span { color:var(--blue2); }
+nav a {
+  color:var(--silver); margin-right:20px; font-size:.85rem; font-weight:500;
+  transition:color .2s; letter-spacing:.02em;
+}
+nav a:hover { color:var(--blue2); }
+.live-dot {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,59,59,.15); border:1px solid rgba(255,59,59,.4);
+  color:var(--red); font-size:.72rem; font-weight:700; letter-spacing:.08em;
+  padding:4px 10px; border-radius:20px; text-transform:uppercase;
+}
+.live-dot::before {
+  content:""; width:7px; height:7px; background:var(--red); border-radius:50%;
+  animation:pulse-red 1.2s ease-in-out infinite;
+}
+@keyframes pulse-red {
+  0%,100%{box-shadow:0 0 0 0 rgba(255,59,59,.6)}
+  50%{box-shadow:0 0 0 5px rgba(255,59,59,0)}
+}
 .search-bar { display:flex; gap:8px; }
-.search-bar input { padding:6px 12px; border-radius:6px; border:none; font-size:.9rem; width:200px; }
-.search-bar button { padding:6px 14px; background:#667eea; color:white; border:none; border-radius:6px; cursor:pointer; }
+.search-bar input {
+  padding:7px 14px; border-radius:8px; font-size:.85rem; width:200px;
+  background:var(--navy3); border:1px solid rgba(0,198,255,.25); color:var(--silver2);
+  outline:none; transition:border .2s;
+}
+.search-bar input:focus { border-color:var(--blue2); }
+.search-bar button {
+  padding:7px 16px; background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white; border:none; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600;
+  transition:opacity .2s;
+}
+.search-bar button:hover { opacity:.85; }
 
-/* ── Hero ── */
-.hero { text-align:center; padding:50px 20px;
-        background:linear-gradient(135deg,#667eea,#764ba2); color:white;
-        border-radius:12px; margin:30px 0 40px; }
-.hero h2 { font-size:2.4rem; margin-bottom:8px; }
-.hero p  { font-size:1.1rem; opacity:.9; }
+/* ── Hero Banner ── */
+.hero-banner {
+  position:relative; width:100%; overflow:hidden;
+  max-height:380px; display:block;
+}
+.hero-banner img {
+  width:100%; height:380px; object-fit:cover; object-position:center;
+  display:block;
+}
+.hero-banner-gradient {
+  position:absolute; inset:0;
+  background:linear-gradient(
+    to right,
+    rgba(6,12,26,.45) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(6,12,26,.45) 100%
+  );
+  pointer-events:none;
+}
+.hero-banner-bottom {
+  position:absolute; bottom:0; left:0; right:0; height:60px;
+  background:linear-gradient(to top,var(--navy) 0%,transparent 100%);
+}
+
+/* ── Category Icons Row ── */
+.cat-icons-row {
+  background:var(--navy2);
+  border-top:1px solid rgba(0,198,255,.12);
+  border-bottom:1px solid rgba(0,198,255,.12);
+  padding:16px 0;
+}
+.cat-icons-inner {
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:8px 24px;
+}
+.cat-icon-item {
+  display:flex; align-items:center; gap:8px; color:var(--silver);
+  font-size:.8rem; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; transition:color .2s; cursor:pointer;
+}
+.cat-icon-item:hover { color:var(--blue2); }
+.cat-icon-item .icon-circle {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--navy3); border:1px solid rgba(0,198,255,.2);
+  display:flex; align-items:center; justify-content:center; font-size:1rem;
+  transition:border-color .2s, background .2s;
+}
+.cat-icon-item:hover .icon-circle { border-color:var(--blue2); background:rgba(0,198,255,.08); }
+
+/* ── Section header ── */
+.section-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin:32px 0 20px; padding-bottom:12px;
+  border-bottom:1px solid rgba(0,198,255,.12);
+}
+.section-header h2 {
+  font-size:1.2rem; font-weight:700; color:var(--white);
+  text-transform:uppercase; letter-spacing:.08em;
+}
+.section-header h2::before { content:""; display:inline-block; width:4px; height:18px; background:var(--blue2); border-radius:2px; margin-right:10px; vertical-align:middle; }
+.section-header a { color:var(--blue2); font-size:.82rem; font-weight:600; }
 
 /* ── Grid ── */
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:28px; margin-bottom:50px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(350px,1fr)); gap:24px; margin-bottom:50px; }
 
-/* ── Cards with image text overlay ── */
-.card { background:white; border-radius:12px; overflow:hidden;
-        box-shadow:0 2px 8px rgba(0,0,0,.08); transition:transform .2s,box-shadow .2s; }
-.card:hover { transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,0,0,.14); }
+/* ── Cards ── */
+.card {
+  background:var(--navy2); border-radius:14px; overflow:hidden;
+  border:1px solid rgba(0,198,255,.1);
+  transition:transform .22s, border-color .22s, box-shadow .22s;
+}
+.card:hover {
+  transform:translateY(-5px);
+  border-color:rgba(0,198,255,.35);
+  box-shadow:0 8px 32px rgba(0,198,255,.1);
+}
 .card-img-wrap { position:relative; height:210px; overflow:hidden; }
 .card-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.card:hover .card-img-wrap img { transform:scale(1.04); }
+.card:hover .card-img-wrap img { transform:scale(1.05); }
 .card-img-overlay {
   position:absolute; bottom:0; left:0; right:0;
-  background:linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.35) 60%, transparent 100%);
+  background:linear-gradient(to top, rgba(6,12,26,.92) 0%, rgba(6,12,26,.4) 60%, transparent 100%);
   padding:36px 16px 14px;
-  color:white; font-size:.95rem; font-weight:600; line-height:1.35;
+  color:var(--white); font-size:.92rem; font-weight:600; line-height:1.35;
 }
 .card-img-cat {
-  display:inline-block; background:rgba(102,126,234,.9); color:white;
-  font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
-  padding:2px 9px; border-radius:20px; margin-bottom:6px;
+  display:inline-block; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  padding:3px 10px; border-radius:20px; margin-bottom:6px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2)); color:white;
 }
 .card-content { padding:16px 20px 20px; }
-.card-excerpt { color:#4a5568; font-size:.92rem; margin-bottom:12px; }
-.card-meta    { font-size:.78rem; color:#718096; margin-bottom:12px; }
-.read-more { display:inline-block; background:#667eea; color:white; padding:7px 16px; border-radius:6px; font-size:.85rem; }
-.read-more:hover { background:#5a67d8; }
+.card-excerpt { color:var(--silver); font-size:.9rem; margin-bottom:12px; line-height:1.6; }
+.card-meta    { font-size:.75rem; color:rgba(168,188,212,.6); margin-bottom:14px; }
+.read-more {
+  display:inline-block; background:transparent;
+  border:1px solid rgba(0,198,255,.4); color:var(--blue2);
+  padding:7px 16px; border-radius:8px; font-size:.82rem; font-weight:600;
+  transition:background .2s, border-color .2s;
+}
+.read-more:hover { background:rgba(0,198,255,.1); border-color:var(--blue2); }
 
-/* ── Category nav ── */
-.cats-nav { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
-.cats-nav a { background:white; border:1px solid #e2e8f0; color:#4a5568; padding:6px 16px; border-radius:20px; font-size:.85rem; }
-.cats-nav a:hover, .cats-nav a.active { background:#667eea; color:white; border-color:#667eea; }
+/* ── Category nav pills ── */
+.cats-nav { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:28px; }
+.cats-nav a {
+  background:var(--navy2); border:1px solid rgba(0,198,255,.15);
+  color:var(--silver); padding:6px 18px; border-radius:20px; font-size:.82rem; font-weight:500;
+  transition:all .2s;
+}
+.cats-nav a:hover, .cats-nav a.active {
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white; border-color:transparent;
+}
+
+/* ── Subscribe CTA banner ── */
+.subscribe-cta {
+  background:linear-gradient(135deg,var(--navy3) 0%,var(--navy4) 100%);
+  border:1px solid rgba(0,198,255,.2);
+  border-radius:16px; padding:36px 40px;
+  display:flex; align-items:center; justify-content:space-between; gap:24px;
+  margin:40px 0; flex-wrap:wrap;
+  box-shadow:0 0 40px rgba(0,198,255,.06);
+}
+.subscribe-cta-text h3 { font-size:1.4rem; font-weight:800; color:var(--white); margin-bottom:6px; }
+.subscribe-cta-text p  { color:var(--silver); font-size:.92rem; }
+.cta-btn {
+  background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 100%);
+  color:white; font-weight:700; font-size:.95rem; padding:13px 28px;
+  border-radius:10px; white-space:nowrap; letter-spacing:.02em;
+  box-shadow:0 4px 20px rgba(0,198,255,.3);
+  transition:box-shadow .2s, transform .2s;
+}
+.cta-btn:hover { box-shadow:0 6px 28px rgba(0,198,255,.5); transform:translateY(-1px); }
 
 /* ── Article page ── */
-.article-page .container { max-width:820px; }
-
-/* Hero image with overlaid title */
+.article-page .container { max-width:860px; }
 .article-hero {
-  position:relative; width:100%; border-radius:14px; overflow:hidden;
-  margin:28px 0 32px; height:420px;
+  position:relative; width:100%; border-radius:16px; overflow:hidden;
+  margin:28px 0 32px; height:430px;
 }
 .article-hero img { width:100%; height:100%; object-fit:cover; display:block; }
 .article-hero-overlay {
   position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.45) 45%, rgba(0,0,0,.1) 100%);
-  display:flex; flex-direction:column; justify-content:flex-end; padding:36px 32px;
-  color:white;
+  background:linear-gradient(to top, rgba(6,12,26,.92) 0%, rgba(6,12,26,.45) 50%, rgba(6,12,26,.1) 100%);
+  display:flex; flex-direction:column; justify-content:flex-end; padding:36px 36px;
+  color:var(--white);
 }
 .article-hero-cat {
-  display:inline-block; background:rgba(102,126,234,.95); color:white;
-  font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-  padding:4px 12px; border-radius:20px; margin-bottom:12px; width:fit-content;
+  display:inline-block;
+  background:linear-gradient(135deg,var(--blue),var(--blue2)); color:white;
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  padding:4px 14px; border-radius:20px; margin-bottom:14px; width:fit-content;
 }
-.article-hero-title { font-size:2rem; font-weight:700; line-height:1.25; text-shadow:0 2px 6px rgba(0,0,0,.4); }
-.article-hero-meta  { margin-top:10px; font-size:.85rem; opacity:.85; }
-
-/* Article body */
+.article-hero-title { font-size:2.1rem; font-weight:800; line-height:1.22; text-shadow:0 2px 10px rgba(0,0,0,.5); }
+.article-hero-meta  { margin-top:12px; font-size:.83rem; color:var(--silver); }
 .article-body {
-  background:white; padding:36px; border-radius:14px;
-  box-shadow:0 2px 10px rgba(0,0,0,.08); font-size:1.08rem;
-  line-height:1.8; margin-bottom:28px;
+  background:var(--navy2); padding:40px; border-radius:16px;
+  border:1px solid rgba(0,198,255,.1);
+  font-size:1.08rem; line-height:1.85; margin-bottom:30px; color:var(--silver2);
 }
-.article-body p { margin-bottom:1.4em; }
+.article-body p { margin-bottom:1.5em; }
 .article-body p:last-child { margin-bottom:0; }
-.source-link { text-align:center; margin-top:28px; padding-top:22px; border-top:1px solid #e2e8f0; }
-.source-link a { color:#667eea; font-size:.9rem; }
-.back-btn { display:inline-block; background:#667eea; color:white; padding:9px 20px; border-radius:8px; margin:24px 0 0; }
-.back-btn:hover { background:#5a67d8; }
+.source-link { text-align:center; margin-top:28px; padding-top:22px; border-top:1px solid rgba(0,198,255,.12); }
+.source-link a { color:var(--blue2); font-size:.9rem; }
+.back-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--navy2); border:1px solid rgba(0,198,255,.2);
+  color:var(--blue2); padding:9px 20px; border-radius:8px; margin:24px 0 0;
+  font-size:.88rem; font-weight:600; transition:all .2s;
+}
+.back-btn:hover { background:rgba(0,198,255,.08); border-color:var(--blue2); }
 
 /* ── Search page ── */
-#search-input { width:100%; padding:14px 18px; font-size:1.1rem;
-                border:2px solid #e2e8f0; border-radius:10px; margin:24px 0 20px; outline:none; }
-#search-input:focus { border-color:#667eea; }
-.search-result-item { background:white; padding:20px; border-radius:10px; margin-bottom:16px; box-shadow:0 1px 5px rgba(0,0,0,.07); }
-.search-result-item h3 a { color:#1a202c; font-size:1.05rem; }
-.search-result-item h3 a:hover { color:#667eea; }
-.search-result-item p { color:#4a5568; font-size:.9rem; margin-top:6px; }
-.no-results { text-align:center; color:#718096; padding:50px; }
+#search-input {
+  width:100%; padding:15px 20px; font-size:1rem;
+  background:var(--navy2); border:1px solid rgba(0,198,255,.25);
+  color:var(--silver2); border-radius:12px; margin:24px 0 20px; outline:none;
+  transition:border .2s;
+}
+#search-input:focus { border-color:var(--blue2); box-shadow:0 0 0 3px rgba(0,198,255,.1); }
+.search-result-item {
+  background:var(--navy2); padding:22px; border-radius:12px; margin-bottom:16px;
+  border:1px solid rgba(0,198,255,.1); transition:border-color .2s;
+}
+.search-result-item:hover { border-color:rgba(0,198,255,.3); }
+.search-result-item h3 a { color:var(--white); font-size:1.02rem; font-weight:600; }
+.search-result-item h3 a:hover { color:var(--blue2); }
+.search-result-item p { color:var(--silver); font-size:.88rem; margin-top:6px; }
+.no-results { text-align:center; color:var(--silver); padding:60px; }
 
 /* ── Footer ── */
-footer { background:#1a202c; color:#718096; text-align:center; padding:30px; margin-top:40px; font-size:.85rem; }
-footer a { color:#a0aec0; margin:0 8px; }
-footer a:hover { color:white; }
+footer {
+  background:var(--navy2);
+  border-top:1px solid rgba(0,198,255,.12);
+  color:var(--silver); padding:50px 0 28px; margin-top:60px;
+}
+.footer-grid {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1.2fr; gap:40px;
+  padding-bottom:36px; border-bottom:1px solid rgba(0,198,255,.1);
+  margin-bottom:24px;
+}
+.footer-brand .logo-text { font-size:1.3rem; font-weight:800; color:var(--white); }
+.footer-brand .logo-text span { color:var(--blue2); }
+.footer-brand p { color:var(--silver); font-size:.85rem; line-height:1.7; margin-top:12px; max-width:280px; }
+.footer-col h4 { color:var(--white); font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px; }
+.footer-col a { display:block; color:var(--silver); font-size:.85rem; margin-bottom:8px; transition:color .2s; }
+.footer-col a:hover { color:var(--blue2); }
+.footer-col .contact-item { display:flex; align-items:flex-start; gap:8px; font-size:.84rem; color:var(--silver); margin-bottom:10px; }
+.footer-col .contact-item a { color:var(--blue2); }
+.footer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:.78rem; color:rgba(168,188,212,.5); }
+.footer-bottom a { color:rgba(168,188,212,.7); margin:0 8px; }
+.footer-bottom a:hover { color:var(--blue2); }
 
+/* ── Page hero (category/static) ── */
+.page-hero {
+  background:linear-gradient(135deg,var(--navy3),var(--navy4));
+  border-bottom:1px solid rgba(0,198,255,.12);
+  padding:40px 0 36px;
+}
+.page-hero h1 { font-size:2rem; font-weight:800; color:var(--white); }
+.page-hero p  { color:var(--silver); font-size:.95rem; margin-top:8px; }
+
+/* ── Static page content box ── */
+.content-box {
+  background:var(--navy2); padding:36px; border-radius:16px;
+  border:1px solid rgba(0,198,255,.1); font-size:1.03rem;
+  line-height:1.8; color:var(--silver2); margin:30px 0;
+}
+.content-box a { color:var(--blue2); }
+.content-box h3 { color:var(--white); font-size:1.1rem; margin:24px 0 10px; }
+
+@media(max-width:900px) {
+  .footer-grid { grid-template-columns:1fr 1fr; }
+}
 @media(max-width:768px) {
   .grid { grid-template-columns:1fr; }
-  .hero h2 { font-size:1.7rem; }
-  .article-hero { height:280px; }
+  .hero-banner img { height:220px; }
+  .hero-banner { max-height:220px; }
+  .article-hero { height:260px; }
   .article-hero-title { font-size:1.4rem; }
   .article-hero-overlay { padding:20px; }
   header .inner { flex-direction:column; align-items:flex-start; }
+  .subscribe-cta { flex-direction:column; }
+  .footer-grid { grid-template-columns:1fr; gap:24px; }
+  .footer-bottom { flex-direction:column; text-align:center; }
 }
 """
 
@@ -407,20 +630,42 @@ def adsense_head() -> str:
 
 
 HEADER_TMPL = """
+<!-- Breaking News Ticker -->
+<div class="ticker-wrap">
+  <div class="container">
+    <div class="ticker-inner">
+      <span class="ticker-label">Breaking</span>
+      <div class="ticker-track">
+        <div class="ticker-items">
+          {% for a in articles[:8] %}<span>{{ a.title }}</span>{% endfor %}
+          {% for a in articles[:8] %}<span>{{ a.title }}</span>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <header>
   <div class="container">
     <div class="inner">
-      <h1><a href="/">{{ site_title }}</a></h1>
+      <a href="/" class="logo-wrap" style="text-decoration:none;">
+        <img src="/images/logo.png" alt="Tech Brief"
+             onerror="this.style.display='none'">
+        <span class="logo-text">Tech<span>Brief</span></span>
+      </a>
       <nav>
         <a href="/">Home</a>
         <a href="/search.html">Search</a>
-        {% for cat in categories %}<a href="/category/{{ cat|lower|replace(' & ','-')|replace(' ','-') }}.html">{{ cat }}</a>{% endfor %}
+        {% for cat in categories %}<a href="/category/{{ cat|lower|replace(' & ','-')|replace(' ','-') }}.html">{{ cat.split(' &')[0] }}</a>{% endfor %}
         <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
       </nav>
-      <form class="search-bar" action="/search.html" method="get">
-        <input type="text" name="q" placeholder="Search articles…">
-        <button type="submit">Go</button>
-      </form>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span class="live-dot">Live</span>
+        <form class="search-bar" action="/search.html" method="get">
+          <input type="text" name="q" placeholder="Search news…">
+          <button type="submit">Search</button>
+        </form>
+      </div>
     </div>
   </div>
 </header>
@@ -428,12 +673,53 @@ HEADER_TMPL = """
 
 FOOTER_TMPL = """
 <footer>
-  <p>&copy; {{ year }} {{ site_title }}. AI‑rewritten summaries are unique. Sources linked.</p>
-  <p style="margin-top:8px;">
-    <a href="/">Home</a> | <a href="/search.html">Search</a> |
-    <a href="/about.html">About</a> | <a href="/contact.html">Contact</a> |
-    <a href="/feed.xml">RSS Feed</a>
-  </p>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo-text">Tech<span>Brief</span></div>
+        <p>AI-rewritten tech news updated every hour. Unique full-length articles powered by a local LLM — original insights on the stories that matter.</p>
+        <div style="display:flex;gap:14px;margin-top:18px;">
+          <a href="/feed.xml" style="color:var(--blue2);font-size:.82rem;font-weight:600;border:1px solid rgba(0,198,255,.3);padding:6px 14px;border-radius:8px;">RSS Feed</a>
+          <a href="/contact.html" style="color:var(--blue2);font-size:.82rem;font-weight:600;border:1px solid rgba(0,198,255,.3);padding:6px 14px;border-radius:8px;">Subscribe</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Sections</h4>
+        <a href="/">All News</a>
+        <a href="/category/ai-machine-learning.html">AI &amp; ML</a>
+        <a href="/category/cybersecurity.html">Cybersecurity</a>
+        <a href="/category/startups-vc.html">Startups &amp; VC</a>
+        <a href="/category/big-tech.html">Big Tech</a>
+        <a href="/category/gadgets-hardware.html">Gadgets</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="/about.html">About TechBrief</a>
+        <a href="/contact.html">Contact Us</a>
+        <a href="/search.html">Search</a>
+        <a href="/feed.xml">RSS Feed</a>
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy Policy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms of Service</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <div class="contact-item">📧 <a href="mailto:voltixio_editor@voltixio.com">voltixio_editor@voltixio.com</a></div>
+        <div class="contact-item">📞 <span>(443) 853-1405</span></div>
+        <div class="contact-item">📍 <span>Windsor Ave, Baltimore MD 21216</span></div>
+        <div class="contact-item" style="margin-top:8px;">
+          <a href="https://voltixio.com" target="_blank" style="color:var(--blue2);font-size:.82rem;">voltixio.com ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; {{ year }} {{ site_title }} · A Voltixio Publication · AI-rewritten summaries. Sources linked.</span>
+      <div>
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms</a>
+        <a href="/sitemap.xml">Sitemap</a>
+      </div>
+    </div>
+  </div>
 </footer>
 """
 
@@ -443,37 +729,88 @@ FOOTER_TMPL = """
 def render_homepage(articles: list[dict], categories: list[str]):
     head_extras = ga4_snippet() + "\n  " + adsense_head()
     banner      = adsense_banner()
+    # Schema.org JSON-LD for the news site
+    jsonld = f"""<script type="application/ld+json">
+  {{"@context":"https://schema.org","@type":"NewsMediaOrganization",
+    "name":"{SITE_TITLE}","url":"{SITE_URL}","logo":"{SITE_URL}/images/logo.png",
+    "contactPoint":{{"@type":"ContactPoint","telephone":"+14438531405","contactType":"editorial"}},
+    "address":{{"@type":"PostalAddress","streetAddress":"Windsor Ave","addressLocality":"Baltimore",
+      "addressRegion":"MD","postalCode":"21216","addressCountry":"US"}}
+  }}
+  </script>"""
     tmpl_str = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{ site_title }} – AI‑Rewritten Tech News</title>
+  <title>{{ site_title }} – Trending Tech News, Updated Hourly</title>
   <meta name="description" content="{{ site_description }}">
   <meta property="og:title"       content="{{ site_title }}">
   <meta property="og:description" content="{{ site_description }}">
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="{{ site_url }}">
+  <meta property="og:image"       content="{{ site_url }}/images/hero-banner.jpg">
   <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:image"      content="{{ site_url }}/images/hero-banner.jpg">
   <link rel="canonical"           href="{{ site_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site_title }}" href="{{ site_url }}/feed.xml">
-  """ + head_extras + """
+  """ + head_extras + "\n  " + jsonld + """
   <style>""" + SHARED_CSS + """</style>
 </head>
 <body>
 """ + HEADER_TMPL + """
-<div class="container">
-  <div class="hero">
-    <h2>AI‑Rewritten Tech News, Updated Hourly</h2>
-    <p>Unique full articles powered by a local LLM – no plagiarism, just original insights.</p>
+
+<!-- ── Hero Banner ───────────────────────────────── -->
+<div class="hero-banner">
+  <img src="/images/hero-banner.jpg"
+       alt="Trending Technology News – Real Time, Real News"
+       onerror="this.style.display='none'">
+  <div class="hero-banner-gradient"></div>
+  <div class="hero-banner-bottom"></div>
+</div>
+
+<!-- ── Category Icons Row ─────────────────────────── -->
+<div class="cat-icons-row">
+  <div class="container">
+    <div class="cat-icons-inner">
+      <a href="/category/ai-machine-learning.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🤖</div><span>AI &amp; Innovation</span>
+      </a>
+      <a href="/category/cybersecurity.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🔐</div><span>Cybersecurity</span>
+      </a>
+      <a href="/category/gadgets-hardware.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">📱</div><span>Gadgets &amp; Reviews</span>
+      </a>
+      <a href="/category/big-tech.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🏢</div><span>Big Tech</span>
+      </a>
+      <a href="/category/startups-vc.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🚀</div><span>Startups &amp; VC</span>
+      </a>
+      <a href="/category/space-science.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">☁️</div><span>Cloud &amp; Future Tech</span>
+      </a>
+    </div>
   </div>
+</div>
+
+<div class="container">
   """ + banner + """
+
+  <!-- Category filter pills -->
+  <div class="section-header" style="margin-top:36px;">
+    <h2>Latest Stories</h2>
+    <a href="/feed.xml">RSS Feed →</a>
+  </div>
   <div class="cats-nav">
     <a href="/" class="active">All</a>
     {% for cat in categories %}
     <a href="/category/{{ cat|lower|replace(' & ','-')|replace(' ','-') }}.html">{{ cat }}</a>
     {% endfor %}
   </div>
+
+  <!-- Article grid -->
   <div class="grid">
     {% for a in articles %}
     <div class="card">
@@ -488,12 +825,22 @@ def render_homepage(articles: list[dict], categories: list[str]):
       </a>
       <div class="card-content">
         <div class="card-excerpt">{{ a.excerpt }}</div>
-        <div class="card-meta">{{ a.pubDate }}</div>
+        <div class="card-meta">🕐 {{ a.pubDate }}</div>
         <a href="{{ a.detail_url }}" class="read-more">Read full story →</a>
       </div>
     </div>
     {% endfor %}
   </div>
+
+  <!-- Subscribe CTA -->
+  <div class="subscribe-cta">
+    <div class="subscribe-cta-text">
+      <h3>🔔 Subscribe &amp; Stay Ahead of the Future</h3>
+      <p>Get AI-rewritten tech news delivered to your inbox — the stories that matter, in your language.</p>
+    </div>
+    <a href="/contact.html" class="cta-btn">Subscribe Now →</a>
+  </div>
+
 </div>
 """ + FOOTER_TMPL + """
 </body>
@@ -596,14 +943,37 @@ def render_category_pages(articles: list[dict], categories: list[str]):
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{ cat }} – {{ site_title }}</title>
-  <meta name="description" content="{{ cat }} news, AI-rewritten hourly.">
+  <meta name="description" content="{{ cat }} tech news, AI-rewritten hourly.">
   <link rel="canonical" href="{{ site_url }}/category/{{ cat_slug }}.html">
   <style>""" + SHARED_CSS + """</style>
 </head>
 <body>
-""" + HEADER_TMPL + """
+<header>
+  <div class="container"><div class="inner">
+    <a href="/" class="logo-wrap" style="text-decoration:none;">
+      <img src="/images/logo.png" alt="Tech Brief" style="height:40px;" onerror="this.style.display='none'">
+      <span class="logo-text">Tech<span style="color:var(--blue2);">Brief</span></span>
+    </a>
+    <nav>
+      <a href="/">Home</a><a href="/search.html">Search</a>
+      {% for c in categories %}<a href="/category/{{ c|lower|replace(' & ','-')|replace(' ','-') }}.html"
+        {% if c == cat %}style="color:var(--blue2);"{% endif %}>{{ c.split(' &')[0] }}</a>{% endfor %}
+      <a href="/about.html">About</a>
+    </nav>
+    <span class="live-dot">Live</span>
+  </div></div>
+</header>
+<div class="page-hero">
+  <div class="container">
+    <h1>{{ cat }}</h1>
+    <p>AI-rewritten {{ cat }} news — updated every hour</p>
+  </div>
+</div>
 <div class="container">
-  <h2 style="margin:30px 0 24px;font-size:1.8rem;">{{ cat }}</h2>
+  <div class="section-header">
+    <h2>{{ cat_articles|length }} Stories</h2>
+    <a href="/">← All news</a>
+  </div>
   <div class="grid">
     {% for a in cat_articles %}
     <div class="card">
@@ -618,13 +988,13 @@ def render_category_pages(articles: list[dict], categories: list[str]):
       </a>
       <div class="card-content">
         <div class="card-excerpt">{{ a.excerpt }}</div>
-        <div class="card-meta">{{ a.pubDate }}</div>
+        <div class="card-meta">🕐 {{ a.pubDate }}</div>
         <a href="{{ a.detail_url }}" class="read-more">Read full story →</a>
       </div>
     </div>
     {% endfor %}
     {% if not cat_articles %}
-    <p style="color:#718096;padding:20px 0;">No articles in this category yet.</p>
+    <p style="color:var(--silver);padding:40px 0;">No articles in this category yet. Check back soon.</p>
     {% endif %}
   </div>
 </div>
@@ -644,29 +1014,55 @@ def render_category_pages(articles: list[dict], categories: list[str]):
 
 
 def render_search_page(categories: list[str]):
+    year = datetime.now().year
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Search – {SITE_TITLE}</title>
+  {ga4_snippet()}
   <style>{SHARED_CSS}</style>
 </head>
 <body>
+<div class="ticker-wrap" style="background:linear-gradient(90deg,#0a84ff,#00c6ff);">
+  <div class="container"><div class="ticker-inner">
+    <span class="ticker-label" style="color:#0a84ff;">Search</span>
+    <div style="color:white;font-size:.82rem;padding:0 20px;">Find any article across all tech categories</div>
+  </div></div>
+</div>
 <header>
   <div class="container"><div class="inner">
-    <h1><a href="/">{SITE_TITLE}</a></h1>
-    <nav><a href="/">Home</a> <a href="/search.html">Search</a> <a href="/about.html">About</a></nav>
+    <a href="/" class="logo-wrap" style="text-decoration:none;">
+      <img src="/images/logo.png" alt="Tech Brief" style="height:40px;" onerror="this.style.display='none'">
+      <span class="logo-text">Tech<span>Brief</span></span>
+    </a>
+    <nav>
+      <a href="/">Home</a><a href="/search.html" style="color:var(--blue2);">Search</a>
+      <a href="/about.html">About</a><a href="/contact.html">Contact</a>
+    </nav>
+    <span class="live-dot">Live</span>
   </div></div>
 </header>
-<div class="container">
-  <h2 style="margin-top:30px;font-size:1.8rem;">Search Articles</h2>
-  <input type="text" id="search-input" placeholder="Type to search…" autofocus>
+<div class="page-hero">
+  <div class="container">
+    <h1>Search Articles</h1>
+    <p>Search across all AI-rewritten tech articles — updated every hour</p>
+  </div>
+</div>
+<div class="container" style="max-width:860px;padding-top:0;">
+  <input type="text" id="search-input" placeholder="Search AI, cybersecurity, startups, gadgets…" autofocus>
   <div id="search-results"></div>
 </div>
 <footer>
-  <p>&copy; {datetime.now().year} {SITE_TITLE}.
-    <a href="/">Home</a> | <a href="/about.html">About</a> | <a href="/feed.xml">RSS</a>
-  </p>
+  <div class="container">
+    <div class="footer-bottom">
+      <span>&copy; {year} {SITE_TITLE} · A Voltixio Publication</span>
+      <div><a href="/">Home</a><a href="/about.html">About</a><a href="/feed.xml">RSS</a>
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms</a>
+      </div>
+    </div>
+  </div>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
 <script>
@@ -690,7 +1086,7 @@ def render_search_page(categories: list[str]):
     let results;
     try {{ results = idx.search(query + '~1'); }} catch(e) {{ results = []; }}
     if (!results.length) {{
-      resultsEl.innerHTML = '<div class="no-results">No articles found for <strong>' + query + '</strong>.</div>';
+      resultsEl.innerHTML = '<div class="no-results">No articles found for <strong style="color:var(--blue2);">' + query + '</strong>.</div>';
       return;
     }}
     resultsEl.innerHTML = results.map(r => {{
@@ -698,7 +1094,9 @@ def render_search_page(categories: list[str]):
       return `<div class="search-result-item">
         <h3><a href="${{a.url}}">${{a.title}}</a></h3>
         <p>${{a.excerpt}}</p>
-        <span style="font-size:.75rem;color:#a0aec0;">${{a.category}} · ${{a.pubDate}}</span>
+        <span style="font-size:.75rem;color:var(--silver);margin-top:8px;display:block;">
+          <span style="color:var(--blue2);">${{a.category}}</span> · ${{a.pubDate}}
+        </span>
       </div>`;
     }}).join('');
   }}
@@ -770,50 +1168,141 @@ def render_robots_txt():
 
 def render_static_pages():
     year = datetime.now().year
+    nav_mini = f"""
+<header>
+  <div class="container"><div class="inner">
+    <a href="/" class="logo-wrap" style="text-decoration:none;">
+      <img src="/images/logo.png" alt="Tech Brief" style="height:40px;" onerror="this.style.display='none'">
+      <span class="logo-text">Tech<span>Brief</span></span>
+    </a>
+    <nav>
+      <a href="/">Home</a><a href="/search.html">Search</a>
+      <a href="/about.html">About</a><a href="/contact.html">Contact</a>
+    </nav>
+    <span class="live-dot">Live</span>
+  </div></div>
+</header>"""
+    footer_mini = f"""
+<footer>
+  <div class="container">
+    <div class="footer-bottom">
+      <span>&copy; {year} {SITE_TITLE} · A Voltixio Publication</span>
+      <div>
+        <a href="/">Home</a><a href="/about.html">About</a><a href="/feed.xml">RSS</a>
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>"""
 
     about = f"""<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>About – {SITE_TITLE}</title><style>{SHARED_CSS}</style></head>
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About – {SITE_TITLE}</title>
+  {ga4_snippet()}
+  <style>{SHARED_CSS}</style>
+</head>
 <body>
-<header><div class="container"><div class="inner">
-  <h1><a href="/">{SITE_TITLE}</a></h1>
-  <nav><a href="/">Home</a><a href="/search.html">Search</a><a href="/about.html">About</a><a href="/contact.html">Contact</a></nav>
-</div></div></header>
-<div class="container" style="max-width:760px;padding:40px 20px;">
-  <h2 style="font-size:2rem;margin-bottom:20px;">About {SITE_TITLE}</h2>
-  <div style="background:white;padding:32px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);line-height:1.8;font-size:1.05rem;">
-    <p style="margin-bottom:16px;"><strong>{SITE_TITLE}</strong> automatically aggregates the latest tech news
-      from across the web and uses a local large language model (Ollama) to rewrite each article into a
-      unique, engaging, full-length piece — plagiarism-free, updated every hour.</p>
-    <p style="margin-bottom:16px;">We cover AI &amp; Machine Learning, Cybersecurity, Startups &amp; VC,
-      Big Tech, Gadgets &amp; Hardware, and Space &amp; Science.</p>
-    <p style="margin-bottom:16px;">All content is AI-generated from publicly available sources.
-      Original sources are always linked. No tracking. No ads. No cookies.</p>
-    <p><a href="/feed.xml" style="color:#667eea;">Subscribe via RSS →</a></p>
+{nav_mini}
+<div class="page-hero">
+  <div class="container">
+    <h1>About {SITE_TITLE}</h1>
+    <p>AI-rewritten tech news from Baltimore, MD · A Voltixio Publication</p>
   </div>
 </div>
-<footer><p>&copy; {year} {SITE_TITLE}. <a href="/">Home</a> | <a href="/contact.html">Contact</a> | <a href="/feed.xml">RSS</a></p></footer>
+<div class="container" style="max-width:860px;">
+  <div class="content-box">
+    <p><strong style="color:var(--white);">{SITE_TITLE}</strong> automatically aggregates the latest technology
+      news from leading sources around the web — including TechCrunch, Ars Technica, VentureBeat, The Hacker News,
+      OpenAI, Anthropic, and more — then uses a local large language model (Ollama with gemma2:9b) to rewrite each
+      article into a unique, engaging, full-length ~500-word piece. Updated every hour. Plagiarism-free.</p>
+    <h3>What We Cover</h3>
+    <p>AI &amp; Machine Learning · Cybersecurity · Startups &amp; VC · Big Tech · Gadgets &amp; Hardware · Space &amp; Science</p>
+    <h3>Our Technology</h3>
+    <p>Every article is re-crafted by a locally-hosted LLM — no data leaves our server, no third-party AI APIs.
+      Original sources are always linked at the bottom of each article. Unique stock photography is auto-generated
+      per article using a deterministic image pipeline.</p>
+    <h3>Part of Voltixio</h3>
+    <p>TechBrief is a publication by <a href="https://voltixio.com" target="_blank">Voltixio</a>, a digital
+      media &amp; AI company based in Baltimore, MD. We build automated content platforms that deliver real value
+      to real readers.</p>
+    <p style="margin-top:20px;">
+      <a href="/feed.xml" style="margin-right:16px;">📡 Subscribe via RSS →</a>
+      <a href="/contact.html">✉️ Contact us →</a>
+    </p>
+  </div>
+</div>
+{footer_mini}
 </body></html>"""
 
     contact = f"""<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Contact – {SITE_TITLE}</title><style>{SHARED_CSS}</style></head>
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact – {SITE_TITLE}</title>
+  {ga4_snippet()}
+  <style>{SHARED_CSS}
+  .contact-form input, .contact-form textarea {{
+    width:100%; padding:13px 16px; border-radius:10px; font-size:.95rem;
+    background:var(--navy3); border:1px solid rgba(0,198,255,.2); color:var(--silver2);
+    outline:none; transition:border .2s; margin-bottom:16px; font-family:inherit;
+  }}
+  .contact-form input:focus, .contact-form textarea:focus {{ border-color:var(--blue2); }}
+  .contact-form textarea {{ height:130px; resize:vertical; }}
+  .contact-form button {{
+    background:linear-gradient(135deg,var(--blue),var(--blue2));
+    color:white; font-weight:700; font-size:.95rem; padding:13px 32px;
+    border:none; border-radius:10px; cursor:pointer; width:100%;
+    transition:opacity .2s;
+  }}
+  .contact-form button:hover {{ opacity:.88; }}
+  </style>
+</head>
 <body>
-<header><div class="container"><div class="inner">
-  <h1><a href="/">{SITE_TITLE}</a></h1>
-  <nav><a href="/">Home</a><a href="/search.html">Search</a><a href="/about.html">About</a><a href="/contact.html">Contact</a></nav>
-</div></div></header>
-<div class="container" style="max-width:760px;padding:40px 20px;">
-  <h2 style="font-size:2rem;margin-bottom:20px;">Contact</h2>
-  <div style="background:white;padding:32px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
-    <p style="margin-bottom:16px;">For questions, corrections, or partnership enquiries:</p>
-    <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:{CONTACT_EMAIL}" style="color:#667eea;">{CONTACT_EMAIL}</a></p>
-    <p style="color:#718096;font-size:.9rem;">We typically respond within 48 hours.</p>
+{nav_mini}
+<div class="page-hero">
+  <div class="container">
+    <h1>Contact TechBrief</h1>
+    <p>Questions, tips, partnerships, corrections — we read every message</p>
   </div>
 </div>
-<footer><p>&copy; {year} {SITE_TITLE}. <a href="/">Home</a> | <a href="/about.html">About</a> | <a href="/feed.xml">RSS</a></p></footer>
+<div class="container" style="max-width:900px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:0;">
+    <div class="content-box" style="margin:30px 0;">
+      <h3 style="margin-top:0;">Get in Touch</h3>
+      <p style="margin-bottom:20px;">For editorial questions, corrections, story tips, advertising enquiries,
+        or partnership opportunities, reach out via any of the channels below.</p>
+      <div class="contact-item" style="margin-bottom:14px;">
+        📧 &nbsp;<a href="mailto:voltixio_editor@voltixio.com">voltixio_editor@voltixio.com</a>
+      </div>
+      <div class="contact-item" style="margin-bottom:14px;">
+        📞 &nbsp;<a href="tel:+14438531405">(443) 853-1405</a>
+      </div>
+      <div class="contact-item" style="margin-bottom:14px;">
+        📍 &nbsp;Windsor Ave, Baltimore MD 21216
+      </div>
+      <div class="contact-item" style="margin-bottom:14px;">
+        🌐 &nbsp;<a href="https://voltixio.com" target="_blank">voltixio.com</a>
+      </div>
+      <p style="margin-top:20px;font-size:.85rem;color:var(--silver);">
+        We typically respond within 48 hours.
+      </p>
+    </div>
+    <div class="content-box" style="margin:30px 0;">
+      <h3 style="margin-top:0;">Send a Message</h3>
+      <form class="contact-form" action="mailto:voltixio_editor@voltixio.com" method="post" enctype="text/plain">
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="email" name="email" placeholder="Your email" required>
+        <input type="text" name="subject" placeholder="Subject">
+        <textarea name="message" placeholder="Your message…" required></textarea>
+        <button type="submit">Send Message →</button>
+      </form>
+    </div>
+  </div>
+</div>
+{footer_mini}
 </body></html>"""
 
     with open(os.path.join(OUTPUT_DIR, "about.html"), "w", encoding="utf-8") as f:
