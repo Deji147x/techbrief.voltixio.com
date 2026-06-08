@@ -1,0 +1,28 @@
+# Runtime caches — regenerated on each run, never commit
+.rewrite_cache.json
+.posted_social.json
+.posted_facebook.json
+
+# Generated site output (served by Nginx, not stored in git)
+/output/
+/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Secrets / env
+.env
+.env.*
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

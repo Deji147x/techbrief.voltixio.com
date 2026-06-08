@@ -1,0 +1,57 @@
+# Tech Brief – Enriched RSS Feed Sources
+# Add these to your uglyfeed config (feeds.opml or feeds.yaml)
+# Covers: AI, Cybersecurity, Startups, Big Tech, Gadgets, Space & Science
+
+# ── AI & Machine Learning ─────────────────────────────────────────────────────
+https://openai.com/blog/rss.xml
+https://www.anthropic.com/news/rss.xml
+https://ai.googleblog.com/feeds/posts/default
+https://huggingface.co/blog/feed.xml
+https://deepmind.google/discover/blog/rss.xml
+https://venturebeat.com/category/ai/feed/
+https://techcrunch.com/tag/artificial-intelligence/feed/
+https://the-decoder.com/feed/
+https://aiweekly.co/issues.rss
+https://bdtechtalks.com/feed/
+
+# ── Cybersecurity ─────────────────────────────────────────────────────────────
+https://feeds.feedburner.com/TheHackersNews
+https://krebsonsecurity.com/feed/
+https://www.bleepingcomputer.com/feed/
+https://nakedsecurity.sophos.com/feed/
+https://www.darkreading.com/rss.xml
+https://threatpost.com/feed/
+https://www.schneier.com/blog/atom.xml
+https://www.csoonline.com/index.rss
+
+# ── Startups & VC ─────────────────────────────────────────────────────────────
+https://techcrunch.com/startups/feed/
+https://news.crunchbase.com/feed/
+https://www.sifted.eu/feed
+https://www.theinformation.com/feed
+https://www.businessinsider.com/sai/rss
+
+# ── Big Tech ──────────────────────────────────────────────────────────────────
+https://feeds.arstechnica.com/arstechnica/index
+https://www.theverge.com/rss/index.xml
+https://www.wired.com/feed/rss
+https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+https://feeds.washingtonpost.com/rss/business/technology
+
+# ── Gadgets & Hardware ────────────────────────────────────────────────────────
+https://www.engadget.com/rss.xml
+https://www.gsmarena.com/rss-news-reviews.php3
+https://gizmodo.com/rss
+https://www.anandtech.com/rss/
+
+# ── Space & Science ───────────────────────────────────────────────────────────
+https://www.nasa.gov/rss/dyn/breaking_news.rss
+https://spacenews.com/feed/
+https://www.newscientist.com/feed/home/
+https://phys.org/rss-feed/
+
+# ── General Tech (high quality) ───────────────────────────────────────────────
+https://feeds.arstechnica.com/arstechnica/technology-lab
+https://www.technologyreview.com/feed/
+https://simonwillison.net/atom/everything/
+https://stratechery.com/feed/
