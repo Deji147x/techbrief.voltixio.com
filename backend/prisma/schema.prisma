@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  url         String   @unique
+  source      String
+  rawContent  String?
+  imageUrl    String?
+  publishedAt DateTime
+
+  // AI-generated fields
+  aiProcessed  Boolean   @default(false)
+  aiSummary    String?
+  aiSimplified String?
+  aiLabel      String[] // canonical category enum — see REBUILD_SPEC.md section 1b
+  aiKeywords   String[] @default([])
+  aiSentiment  String? // 'supporting' | 'opposing' | 'neutral' — stance framing, see section 2.4
+  processedAt  DateTime?
+
+  // Engagement
+  engagementScore Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([publishedAt])
+  @@index([aiLabel])
+}
+
+model TechBriefUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model EngagementEvent {
+  id        String   @id @default(uuid())
+  articleId String
+  userId    String?
+  type      String // 'view' | 'read' | 'share'
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
+}

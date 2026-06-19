@@ -1,0 +1,41 @@
+{
+  "name": "voltixio-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "ai:process": "tsx src/scripts/process-queue.ts",
+    "ai:trends": "tsx src/scripts/detect-trends.ts",
+    "rss:poll": "tsx src/scripts/poll-feeds.ts",
+    "test": "jest"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "ioredis": "^5.4.1",
+    "node-cron": "^3.0.3",
+    "openai": "^4.55.0",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "@types/node-cron": "^3.0.11",
+    "prisma": "^5.18.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4"
+  }
+}
