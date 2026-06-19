@@ -39,15 +39,12 @@ Source: adapted from `techbrief-processor.ts`'s `categorizeTechContent` prompt (
 
 Same problem as the taxonomy: `aiKeywords`, `aiSentiment`, `engagementScore`, etc. have each been introduced ad hoc in different files with no single schema doc. This consolidates every field referenced across all reviewed code into one canonical model — this supersedes any field set implied elsewhere.
 
-```prisma
-enum AppName {
-  techbrief
-  newsfeed
-}
+Per decision #10b: **separate databases per app**, not one shared database with an `app` discriminator. Each app's backend connection targets its own database, so there is no `AppName` enum and no `app` column — each database's `Article` model is scoped to that app already by virtue of which database it lives in.
 
+```prisma
+// techbrief database — apps/techbrief's Article model
 model Article {
   id            String   @id @default(uuid())
-  app           AppName
   title         String
   description   String?
   url           String   @unique
@@ -62,7 +59,7 @@ model Article {
   aiSimplified    String?
   aiLabel         String[]  // canonical category enum, see 1b — NOT a single string
   aiKeywords      String[]  @default([])
-  aiSentiment     String?   // 'supporting' | 'opposing' | 'neutral' — TechBrief stance framing (see 2.4); NewsFeed uses a separate 'lean' field, not this one
+  aiSentiment     String?   // 'supporting' | 'opposing' | 'neutral' — TechBrief stance framing (see 2.4)
   processedAt     DateTime?
 
   // Engagement
@@ -70,7 +67,35 @@ model Article {
 
   createdAt     DateTime @default(now())
 
-  @@index([app, publishedAt])
+  @@index([publishedAt])
+  @@index([aiLabel])
+}
+
+// newsfeed database — apps/newsfeed's Article model
+// Same shape, minus TechBrief-specific stance framing, plus NewsFeed's own fields.
+model Article {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  url           String   @unique
+  source        String
+  rawContent    String?
+  imageUrl      String?
+  publishedAt   DateTime
+
+  aiProcessed     Boolean   @default(false)
+  aiSummary       String?
+  aiSimplified    String?
+  aiLabel         String[]  // NewsFeed's own general-news taxonomy — not TechBrief's (see decision #2)
+  aiKeywords      String[]  @default([])
+  politicalLean   String?   // 'left' | 'center' | 'right' — NewsFeed's Opposing Views framing (see decision #4), distinct from TechBrief's aiSentiment
+  processedAt     DateTime?
+
+  engagementScore Int      @default(0)
+
+  createdAt     DateTime @default(now())
+
+  @@index([publishedAt])
   @@index([aiLabel])
 }
 
@@ -110,7 +135,8 @@ Note: `aiSentiment` is reused for TechBrief's "opposing views" stance (`supporti
 7. **RSS source list.** Several proposed URLs are dead (see bugs below). Confirm final source list per app — reuse the existing curated `feeds.txt` for TechBrief; NewsFeed's general-news list needs a working equivalent (BBC, Guardian, NPR, AP — verify each URL resolves before adding).
 8. **Category taxonomy drift — RESOLVED.** See #2 above: the 14-category `techbrief-processor.ts` list (plus `Other`) is now canonical for TechBrief. The other three lists (`feeds.txt` groupings, the original draft enum, `techbrief-sources.ts`'s per-feed categories) are superseded — when the schema/config/prompts are actually built, they must all reference the single list in #2, not their own versions.
 9. **`aiLabel` type — RESOLVED: `String[]`.** Multi-category is the real intent (per `categorizeTechContent`), so the Prisma schema field is `aiLabel: String[]`. `AIProcessingService.generateLabel` (single-string version) must be rewritten to return an array matching the canonical enum via structured output. Every consuming service (`detectTechTrends`, `findOpposingViews`, `PersonalizationEngine`) must assume array type directly — no defensive `Array.isArray` checks. `findOpposingViews`'s `aiLabel: { contains: topic }` Prisma filter must become `aiLabel: { hasSome: [topic] }` to match the array type correctly (this was bug #15 in section 3 — now has a concrete fix).
-10. **Frontend/backend boundary — consolidates bugs #39, #40, #41.** Reviewed frontend config (`apps/techbrief/.env.local`, `package.json`) gives the Next.js app direct access to `DATABASE_URL`, `STRIPE_SECRET_KEY`, `JWT_SECRET`, `SENDGRID_API_KEY`, `OPENAI_API_KEY`, plus Prisma scripts (`db:generate`/`migrate`/`seed`/`studio`) and AI-processing scripts (`ai:process`, `ai:trends`). Those are three separate symptoms of one decision never made explicit: **does the frontend talk to Postgres/Stripe/OpenAI directly, or only to the backend's API?** Recommendation: strict two-tier split — `/backend` owns Prisma, all secrets, AI processing, and RSS aggregation; `/apps/techbrief` and `/apps/newsfeed` hold only `NEXT_PUBLIC_*` config and call the backend over HTTP. This is the only option consistent with bug #39's security finding, and it's also what makes a shared backend with two independently-deployed frontends (TechBrief here, NewsFeed in its own repo) actually work cleanly. If accepted: strip `DATABASE_URL`, `STRIPE_SECRET_KEY`, `JWT_SECRET`, `SENDGRID_API_KEY`, `OPENAI_API_KEY` from frontend env; move `db:*` and `ai:*` scripts to `/backend`'s `package.json`; frontend keeps only `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_APP_URL`, and publishable (non-secret) client keys (`STRIPE_PUBLISHABLE_KEY`, Auth0 client ID).
+10. **Frontend/backend boundary — consolidates bugs #39, #40, #41, #59.** Reviewed frontend config (`apps/techbrief/.env.local`, `apps/newsfeed/.env.local`, both `package.json`s) gives both Next.js apps direct access to `DATABASE_URL`, `STRIPE_SECRET_KEY`, `JWT_SECRET`, `SENDGRID_API_KEY`/`ELEVENLABS_API_KEY`, `OPENAI_API_KEY`, plus Prisma scripts (`db:generate`/`migrate`/`seed`/`studio`) and AI/audio/puzzle-processing scripts. Those are symptoms of one decision never made explicit: **does the frontend talk to Postgres/Stripe/OpenAI directly, or only to the backend's API?** Recommendation: strict two-tier split — `/backend` owns Prisma, all secrets, AI processing, RSS aggregation, audio generation, and puzzle generation; `/apps/techbrief` and `/apps/newsfeed` hold only `NEXT_PUBLIC_*` config and call the backend over HTTP. This is the only option consistent with bug #39's security finding, and it's also what makes two independently-deployed frontends against a shared backend actually work cleanly. If accepted: strip all secret env vars from both frontends; move `db:*`, `ai:*`, `audio:*`, `puzzle:*` scripts to `/backend`'s `package.json`; each frontend keeps only its `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_APP_URL`, and publishable (non-secret) client keys.
+10b. **Shared vs. separate databases — RESOLVED: separate databases per app.** Decided: TechBrief and NewsFeed each get their own Postgres database (`techbrief`, `newsfeed`), for read/write consistency and full data isolation — not the single shared-database-with-`app`-discriminator design originally drafted in the canonical schema (section 1c). This resolves bug #60, but **requires reworking section 1c**: drop the `AppName` enum and `app` column from `Article`, since there's no longer a shared table to discriminate rows in — each app's backend connects to its own database with its own (now app-specific) `Article` table. The backend service itself can still be one shared codebase/deployment; it just opens a connection to whichever database matches the request's app context, rather than filtering one table by `app`.
 
 ## 3. Confirmed bugs in reviewed code `[BUG]`
 
@@ -178,6 +204,8 @@ Note: `aiSentiment` is reused for TechBrief's "opposing views" stance (`supporti
 | 60 | **`apps/newsfeed/.env.local` × canonical schema (section 1c) — CONTRADICTION.** `DATABASE_URL=postgresql://.../newsfeed` points at a separate `newsfeed` database, while TechBrief's points at a separate `techbrief` database. The canonical Prisma schema assumes **one shared database** with an `AppName` (`techbrief`/`newsfeed`) discriminator column on a single `Article` table (section 1c, decision #10's "shared backend" model). Two separate databases is a different, equally valid architecture (full data isolation, no shared schema risk) — but it's not what's currently designed. Decide: one shared Postgres database with `app` discriminator (as schema currently assumes), or two fully separate databases (as these env files currently show)? This changes the Prisma schema and the backend's connection setup either way. |
 | 61 | `apps/newsfeed/.env.local` push notifications × section 5 | `ONE_SIGNAL_APP_ID`/`ONE_SIGNAL_API_KEY` and `FIREBASE_SERVER_KEY` are both configured, despite section 5 explicitly deferring "native mobile apps / push notifications" until the web product validates. Also: two competing push providers (OneSignal and Firebase) are present simultaneously with no indication which is actually intended — redundant even if push weren't deferred. |
 | 62 | `apps/newsfeed/.env.local` analytics | `ANALYTICS_WRITE_KEY` (Segment) and `MIXPANEL_TOKEN` both present — same redundant-tooling pattern as bug #61, two competing analytics providers configured at once with no stated choice. TechBrief's `.env.local` only had Segment, not Mixpanel — another cross-app inconsistency, same family as bug #59/decision #1b's Auth0 gap. |
+| 63 | **`apps/newsfeed/package.json` — same architecture issue as bugs #40/#41, decision #10.** `db:generate`/`db:migrate`/`db:seed` (Prisma) and `audio:generate`/`audio:cleanup`/`puzzle:generate` all live in the frontend package, not the backend's. Confirms decision #10 applies to NewsFeed identically — these scripts move to `/backend`. |
+| 64 | `apps/newsfeed/package.json` `deploy:staging` | Same bug as #42: `vercel --prod --env staging` forces production regardless of `--env`. Identical fix needed in both apps' scripts. |
 
 ## 4. Build order (once section 2 is resolved)
 
