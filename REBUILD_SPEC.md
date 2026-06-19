@@ -13,17 +13,46 @@ Status: DRAFT — not yet frozen. Items marked `[DECIDE]` block the build and ne
 - **Fully independent apps.** Separate user tables, separate auth/sessions, separate subscriptions/billing per app. No SSO, no cross-app entitlement. One person can have a TechBrief account and a NewsFeed account with no link between them.
 - Shared backend serves both via an `app: 'techbrief' | 'newsfeed'` discriminator on content.
 
+## 1b. Canonical TechBrief category enum (locked)
+
+```
+AI/ML
+Cybersecurity/Privacy
+Cloud Computing/Infrastructure
+Developer Tools/Programming
+Consumer Tech/Gadgets
+Startups/Venture Capital
+Blockchain/Web3
+Biotech/Health Tech
+Clean Energy/Climate Tech
+Space/Aerospace
+Semiconductors/Hardware
+Social Media/Platforms
+Regulation/Policy
+Tech Culture/Workplace
+Other
+```
+
+Source: adapted from `techbrief-processor.ts`'s `categorizeTechContent` prompt (most thorough of four competing lists found in review). Supersedes the original `feeds.txt` groupings, the earlier draft enum in this spec, and `techbrief-sources.ts`'s per-feed categories. `aiLabel` is `String[]` (multi-category per article), enforced via structured output/function calling — never free-text. NewsFeed needs its own separate category list, not yet drafted.
+
 ## 2. Open decisions `[DECIDE]`
 
 1. **LLM provider/cost model.** Today's rewrite uses local Ollama (free). Proposed AI processing service uses OpenAI `gpt-4-turbo-preview` (paid, 3 calls/article: summary, simplified, label). Decide: does OpenAI replace Ollama entirely, does Ollama keep doing the heavy rewrite while OpenAI only does summary/simplify/label, or does everything stay on a self-hosted model? This is a real recurring-cost decision, not a code detail — estimate $/month at expected article volume before committing.
-2. **Category taxonomy.** Must become a fixed enum (e.g., `AI/ML, Cybersecurity, Startups/VC, Big Tech, Gadgets/Hardware, Space/Science, Other` for TechBrief; a separate list for NewsFeed), enforced via structured output/function calling at generation time — not free-text. Free-text labels are what's currently breaking personalization (interest scores fragment across near-duplicate strings).
+2. **Category taxonomy — RESOLVED.** Canonical TechBrief category enum, locked (see section 1b for full rationale):
+   ```
+   AI/ML, Cybersecurity/Privacy, Cloud Computing/Infrastructure, Developer Tools/Programming,
+   Consumer Tech/Gadgets, Startups/Venture Capital, Blockchain/Web3, Biotech/Health Tech,
+   Clean Energy/Climate Tech, Space/Aerospace, Semiconductors/Hardware, Social Media/Platforms,
+   Regulation/Policy, Tech Culture/Workplace, Other
+   ```
+   This replaces all four previously-conflicting lists (original `feeds.txt` groupings, the earlier draft enum, `techbrief-sources.ts`'s per-feed categories, and the ad-hoc list in `techbrief-processor.ts`'s prompt). Must be enforced via structured output/function calling at generation time, not free-text parsing. NewsFeed gets its own separate list (general-news categories) — not yet drafted, needs its own decision pass when NewsFeed's backend work starts.
 3. **Per-app prompt differentiation.** TechBrief = technical/professional tone; NewsFeed = general-audience tone. No prompts branch by `app` yet anywhere reviewed. Needs explicit prompt sets per app, not one prompt reused for both.
 4. **"Opposing Views" feature design — RESOLVED DIRECTION, needs build-out.** Reviewed UI (`OpposingViews.tsx`) renders a left/right political-spectrum badge design copied from general-news competitive research (AllSides/SmartNews-style). That framing doesn't fit TechBrief's audience or content — most tech/AI/security/startup stories have no coherent left/right axis, so the feature would render empty or look forced on most articles. Recommendation: reframe TechBrief's version as **competing analytical/technical stances** (e.g., "vendor's claim vs. security researcher's rebuttal," "bullish vs. skeptical take on a launch") instead of political lean. Keep the left/right political framing for NewsFeed, where it actually matches the general-news audience and competitive pattern. Still needs: cross-source topic clustering to find a counter-take, and a tagging scheme for "stance" (TechBrief) vs. "lean" (NewsFeed) — these are two different classification problems, not one shared feature.
 5. **Engagement event wiring.** `updateEngagementScore` (view/read/share weights) exists but nothing calls it. Need: where do view/read/share events actually fire from the frontend (article open, scroll/dwell timer for "read" ≥30s per your engaged-clicks goal, share button), and what API endpoint receives them.
 6. **Infra sizing.** Kubernetes was proposed for a pre-launch, zero-traffic product. Recommend: start with a single Docker Compose host (Postgres + Redis + backend + both frontends), revisit orchestration only once there's real load. Confirm before any `/infrastructure/k8s` work happens.
 7. **RSS source list.** Several proposed URLs are dead (see bugs below). Confirm final source list per app — reuse the existing curated `feeds.txt` for TechBrief; NewsFeed's general-news list needs a working equivalent (BBC, Guardian, NPR, AP — verify each URL resolves before adding).
-8. **Category taxonomy keeps drifting — pick ONE list and stop.** Four different category sets have appeared across files reviewed so far: (a) original `feeds.txt` groupings, (b) the enum proposed in this spec (#2 above), (c) `techbrief-sources.ts`'s per-feed `category` field (`Startups & VC, Consumer Tech, Science & Tech...`), (d) `techbrief-processor.ts`'s `categorizeTechContent` prompt (14 categories: `AI/ML, Cybersecurity/Privacy, Cloud Computing/Infrastructure...`). Every new file invents its own list. Before more code is written: pick (d) as the working draft (it's the most thorough), finalize it as the canonical TechBrief enum, delete the other three, and use it everywhere — feed source config, AI categorization prompt, and personalization matching all need to reference the same fixed list.
-9. **`aiLabel` type is inconsistent across files — string or array?** `AIProcessingService.generateLabel` (earlier file) returns a single string. `TechBriefProcessor.categorizeTechContent` (this file) returns `string[]` (multiple categories via comma-split). `detectTechTrends` defensively handles both (`Array.isArray(article.aiLabel) ? ... : [article.aiLabel]`) — meaning even the code itself isn't sure which type `aiLabel` is. This needs to be settled in the Prisma schema as one type (recommend `aiLabel: String[]` if multi-category is the real intent) and every service updated to match — not defensive `Array.isArray` checks scattered through the codebase.
+8. **Category taxonomy drift — RESOLVED.** See #2 above: the 14-category `techbrief-processor.ts` list (plus `Other`) is now canonical for TechBrief. The other three lists (`feeds.txt` groupings, the original draft enum, `techbrief-sources.ts`'s per-feed categories) are superseded — when the schema/config/prompts are actually built, they must all reference the single list in #2, not their own versions.
+9. **`aiLabel` type — RESOLVED: `String[]`.** Multi-category is the real intent (per `categorizeTechContent`), so the Prisma schema field is `aiLabel: String[]`. `AIProcessingService.generateLabel` (single-string version) must be rewritten to return an array matching the canonical enum via structured output. Every consuming service (`detectTechTrends`, `findOpposingViews`, `PersonalizationEngine`) must assume array type directly — no defensive `Array.isArray` checks. `findOpposingViews`'s `aiLabel: { contains: topic }` Prisma filter must become `aiLabel: { hasSome: [topic] }` to match the array type correctly (this was bug #15 in section 3 — now has a concrete fix).
 
 ## 3. Confirmed bugs in reviewed code `[BUG]`
 
