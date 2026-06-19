@@ -20,6 +20,7 @@ venv/
 .env.*
 !.env.example
 !.env.local.example
+!.env.production.example
 secrets.json
 
 # Node
