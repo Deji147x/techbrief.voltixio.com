@@ -35,6 +35,62 @@ Other
 
 Source: adapted from `techbrief-processor.ts`'s `categorizeTechContent` prompt (most thorough of four competing lists found in review). Supersedes the original `feeds.txt` groupings, the earlier draft enum in this spec, and `techbrief-sources.ts`'s per-feed categories. `aiLabel` is `String[]` (multi-category per article), enforced via structured output/function calling — never free-text. NewsFeed needs its own separate category list, not yet drafted.
 
+## 1c. Canonical Prisma schema (locked, consolidates all fields seen so far)
+
+Same problem as the taxonomy: `aiKeywords`, `aiSentiment`, `engagementScore`, etc. have each been introduced ad hoc in different files with no single schema doc. This consolidates every field referenced across all reviewed code into one canonical model — this supersedes any field set implied elsewhere.
+
+```prisma
+enum AppName {
+  techbrief
+  newsfeed
+}
+
+model Article {
+  id            String   @id @default(uuid())
+  app           AppName
+  title         String
+  description   String?
+  url           String   @unique
+  source        String
+  rawContent    String?
+  imageUrl      String?
+  publishedAt   DateTime
+
+  // AI-generated fields
+  aiProcessed     Boolean   @default(false)
+  aiSummary       String?
+  aiSimplified    String?
+  aiLabel         String[]  // canonical category enum, see 1b — NOT a single string
+  aiKeywords      String[]  @default([])
+  aiSentiment     String?   // 'supporting' | 'opposing' | 'neutral' — TechBrief stance framing (see 2.4); NewsFeed uses a separate 'lean' field, not this one
+  processedAt     DateTime?
+
+  // Engagement
+  engagementScore Int      @default(0)
+
+  createdAt     DateTime @default(now())
+
+  @@index([app, publishedAt])
+  @@index([aiLabel])
+}
+
+// Fully independent per-app user models (per decision in section 1) — NOT a shared User table.
+model TechBriefUser {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  createdAt     DateTime @default(now())
+  // subscription/auth fields TBD when decision #1 (LLM cost) and premium-tier work (explicitly deferred, section 5) are revisited
+}
+
+model NewsFeedUser {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  createdAt     DateTime @default(now())
+}
+```
+
+Note: `aiSentiment` is reused for TechBrief's "opposing views" stance (`supporting/opposing/neutral`, per the resolved direction in decision #4) — NewsFeed's political-lean version of the same UI pattern needs its own separate field (e.g. `politicalLean`), not this one, since they're different classification problems per decision #4.
+
 ## 2. Open decisions `[DECIDE]`
 
 1. **LLM provider/cost model.** Today's rewrite uses local Ollama (free). Proposed AI processing service uses OpenAI `gpt-4-turbo-preview` (paid, 3 calls/article: summary, simplified, label). Decide: does OpenAI replace Ollama entirely, does Ollama keep doing the heavy rewrite while OpenAI only does summary/simplify/label, or does everything stay on a self-hosted model? This is a real recurring-cost decision, not a code detail — estimate $/month at expected article volume before committing.
