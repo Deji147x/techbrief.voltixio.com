@@ -20,6 +20,6 @@ async function run() {
 }
 
 // Every 5 min — new articles arrive via the 30-min RSS poll, so this keeps
-// the processing backlog short without polling OpenAI more than needed.
+// the processing backlog short without hammering Ollama more than needed.
 cron.schedule('*/5 * * * *', run);
 run();

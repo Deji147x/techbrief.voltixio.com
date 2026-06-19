@@ -17,12 +17,22 @@ services:
     ports:
       - '6379:6379'
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama_data:/root/.ollama
+
   backend:
     build: ./backend
     env_file: ./backend/.env
+    environment:
+      OLLAMA_URL: http://ollama:11434
     depends_on:
       - postgres
       - redis
+      - ollama
     ports:
       - '4000:4000'
 
@@ -37,10 +47,13 @@ services:
   ai-processor:
     build: ./backend
     env_file: ./backend/.env
+    environment:
+      OLLAMA_URL: http://ollama:11434
     command: npm run ai:process
     depends_on:
       - postgres
       - redis
+      - ollama
 
   techbrief:
     build: ./apps/techbrief
@@ -52,3 +65,4 @@ services:
 
 volumes:
   postgres_data:
+  ollama_data:
