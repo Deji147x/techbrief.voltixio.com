@@ -15,6 +15,9 @@
     "rss:poll": "tsx src/scripts/poll-feeds.ts",
     "test": "jest"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^5.18.0",
     "cors": "^2.8.5",
