@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import cron from 'node-cron';
 import { prisma } from '../lib/prisma';
 import { processArticle } from '../services/aiProcessor';
 
@@ -18,4 +19,7 @@ async function run() {
   }
 }
 
+// Every 5 min — new articles arrive via the 30-min RSS poll, so this keeps
+// the processing backlog short without polling OpenAI more than needed.
+cron.schedule('*/5 * * * *', run);
 run();
