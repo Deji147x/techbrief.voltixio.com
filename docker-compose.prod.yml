@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -39,6 +38,8 @@ services:
     restart: unless-stopped
     env_file: ./backend/.env.production
     command: npm run rss:poll
+    volumes:
+      - ./feeds.txt:/feeds.txt:ro
     depends_on:
       - postgres
       - redis
