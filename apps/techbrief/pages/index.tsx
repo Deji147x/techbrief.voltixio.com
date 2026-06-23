@@ -130,7 +130,7 @@ export default function Home() {
             <h3>Never miss a breaking story</h3>
             <p>AI-curated tech news, rewritten and delivered hourly — straight to the point.</p>
           </div>
-          <a href="mailto:hello@voltixio.com?subject=Subscribe" className="cta-btn">
+          <a href="mailto:voltixio_editor@voltixio.com?subject=Subscribe" className="cta-btn">
             Subscribe Free
           </a>
         </div>

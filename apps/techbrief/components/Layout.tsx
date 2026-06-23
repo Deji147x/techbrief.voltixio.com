@@ -126,7 +126,7 @@ export function Layout({
             <div className="footer-col">
               <h4>Contact</h4>
               <div className="contact-item">
-                <a href="mailto:hello@voltixio.com">hello@voltixio.com</a>
+                <a href="mailto:voltixio_editor@voltixio.com">voltixio_editor@voltixio.com</a>
               </div>
             </div>
           </div>
