@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Tech Brief – Trending Tech News, Updated Hourly</title>
+  <meta name="description" content="Breaking tech news and insights, updated hourly.">
+  <meta property="og:title"       content="AI Tech Brief">
+  <meta property="og:description" content="Breaking tech news and insights, updated hourly.">
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://techbrief.voltixio.com">
+  <meta property="og:image"       content="https://techbrief.voltixio.com/images/hero-banner.png">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:image"      content="https://techbrief.voltixio.com/images/hero-banner.png">
+  <link rel="canonical"           href="https://techbrief.voltixio.com">
+  <link rel="alternate" type="application/rss+xml" title="AI Tech Brief" href="https://techbrief.voltixio.com/feed.xml">
+  <!-- Google Search Console -->
+<meta name="google-site-verification" content="2zSf1WTlayFIeZiYg_vN_8ru9g7_WjgDg878Ej7aBXc" />
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/images/favicon.png">
+<link rel="apple-touch-icon" href="/images/favicon.png">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DHCN454V9J"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-DHCN454V9J');</script>
+<!-- Google Subscribe with Google (SwG) -->
+<script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+<script>(self.SWG_BASIC=self.SWG_BASIC||[]).push(b=>{b.init({type:"NewsArticle",isPartOfType:["Product"],isPartOfProductId:"CAowmtTgCw:openaccess",clientOptions:{theme:"light",lang:"en"}});});</script>
+  
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"NewsMediaOrganization",
+    "name":"AI Tech Brief","url":"https://techbrief.voltixio.com","logo":"https://techbrief.voltixio.com/images/logo.png",
+    "contactPoint":{"@type":"ContactPoint","telephone":"+14438531405","contactType":"editorial"},
+    "address":{"@type":"PostalAddress","streetAddress":"Windsor Ave","addressLocality":"Baltimore",
+      "addressRegion":"MD","postalCode":"21216","addressCountry":"US"}
+  }
+  </script>
+  <style>
+:root {
+  --navy:   #060c1a;
+  --navy2:  #0d1526;
+  --navy3:  #111d33;
+  --navy4:  #162040;
+  --blue:   #0a84ff;
+  --blue2:  #00c6ff;
+  --cyan:   #00e5ff;
+  --glow:   rgba(0,198,255,.18);
+  --red:    #ff3b3b;
+  --silver: #a8bcd4;
+  --silver2:#cdd9e8;
+  --white:  #ffffff;
+}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--navy); color:var(--silver2); line-height:1.6;
+}
+a { text-decoration:none; }
+.container { max-width:1240px; margin:0 auto; padding:0 24px; }
+
+/* ── Breaking News Ticker ── */
+.ticker-wrap {
+  background:linear-gradient(90deg,var(--red) 0%,#c0392b 100%);
+  padding:8px 0; overflow:hidden; position:relative; z-index:10;
+}
+.ticker-inner { display:flex; align-items:center; gap:0; }
+.ticker-label {
+  background:var(--white); color:var(--red); font-size:.72rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.1em; padding:3px 12px; white-space:nowrap;
+  margin-right:20px; flex-shrink:0; border-radius:2px;
+}
+.ticker-track {
+  overflow:hidden; flex:1;
+}
+.ticker-items {
+  display:inline-flex; gap:60px; white-space:nowrap;
+  animation:ticker 40s linear infinite;
+}
+.ticker-items span { color:var(--white); font-size:.82rem; font-weight:500; }
+.ticker-items span::before { content:"⚡ "; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ── Header ── */
+header {
+  background:rgba(6,12,26,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(0,198,255,.15);
+  padding:14px 0;
+  position:sticky; top:0; z-index:100;
+}
+header .inner { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.logo-wrap { display:flex; align-items:center; gap:10px; }
+.logo-wrap img { height:40px; width:40px; object-fit:contain; border-radius:8px; }
+.logo-text { font-size:1.3rem; font-weight:800; color:var(--white); letter-spacing:-.02em; }
+.logo-text span { color:var(--blue2); }
+nav a {
+  color:var(--silver); margin-right:20px; font-size:.85rem; font-weight:500;
+  transition:color .2s; letter-spacing:.02em;
+}
+nav a:hover { color:var(--blue2); }
+.live-dot {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,59,59,.15); border:1px solid rgba(255,59,59,.4);
+  color:var(--red); font-size:.72rem; font-weight:700; letter-spacing:.08em;
+  padding:4px 10px; border-radius:20px; text-transform:uppercase;
+}
+.live-dot::before {
+  content:""; width:7px; height:7px; background:var(--red); border-radius:50%;
+  animation:pulse-red 1.2s ease-in-out infinite;
+}
+@keyframes pulse-red {
+  0%,100%{box-shadow:0 0 0 0 rgba(255,59,59,.6)}
+  50%{box-shadow:0 0 0 5px rgba(255,59,59,0)}
+}
+.search-bar { display:flex; gap:8px; }
+.search-bar input {
+  padding:7px 14px; border-radius:8px; font-size:.85rem; width:200px;
+  background:var(--navy3); border:1px solid rgba(0,198,255,.25); color:var(--silver2);
+  outline:none; transition:border .2s;
+}
+.search-bar input:focus { border-color:var(--blue2); }
+.search-bar button {
+  padding:7px 16px; background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white; border:none; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600;
+  transition:opacity .2s;
+}
+.search-bar button:hover { opacity:.85; }
+
+/* ── Hero Banner ── */
+.hero-banner {
+  width:100%; background:#060c1a;
+  display:flex; justify-content:center; align-items:center;
+  padding:18px 0 0; line-height:0;
+}
+.hero-banner-inner {
+  width:75%; max-width:1080px; position:relative;
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 0 40px rgba(0,198,255,.12),0 0 80px rgba(10,132,255,.08);
+}
+.hero-banner img {
+  width:100%; height:auto; display:block;
+}
+.hero-banner-gradient { display:none; }
+.hero-banner-bottom   { display:none; }
+
+/* ── Category Icons Row ── */
+.cat-icons-row {
+  background:var(--navy2);
+  border-top:1px solid rgba(0,198,255,.12);
+  border-bottom:1px solid rgba(0,198,255,.12);
+  padding:16px 0;
+}
+.cat-icons-inner {
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:8px 24px;
+}
+.cat-icon-item {
+  display:flex; align-items:center; gap:8px; color:var(--silver);
+  font-size:.8rem; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; transition:color .2s; cursor:pointer;
+}
+.cat-icon-item:hover { color:var(--blue2); }
+.cat-icon-item .icon-circle {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--navy3); border:1px solid rgba(0,198,255,.2);
+  display:flex; align-items:center; justify-content:center; font-size:1rem;
+  transition:border-color .2s, background .2s;
+}
+.cat-icon-item:hover .icon-circle { border-color:var(--blue2); background:rgba(0,198,255,.08); }
+
+/* ── Section header ── */
+.section-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin:32px 0 20px; padding-bottom:12px;
+  border-bottom:1px solid rgba(0,198,255,.12);
+}
+.section-header h2 {
+  font-size:1.2rem; font-weight:700; color:var(--white);
+  text-transform:uppercase; letter-spacing:.08em;
+}
+.section-header h2::before { content:""; display:inline-block; width:4px; height:18px; background:var(--blue2); border-radius:2px; margin-right:10px; vertical-align:middle; }
+.section-header a { color:var(--blue2); font-size:.82rem; font-weight:600; }
+
+/* ── Grid ── */
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(350px,1fr)); gap:24px; margin-bottom:50px; }
+
+/* ── Cards ── */
+.card {
+  background:var(--navy2); border-radius:14px; overflow:hidden;
+  border:1px solid rgba(0,198,255,.1);
+  transition:transform .22s, border-color .22s, box-shadow .22s;
+}
+.card:hover {
+  transform:translateY(-5px);
+  border-color:rgba(0,198,255,.35);
+  box-shadow:0 8px 32px rgba(0,198,255,.1);
+}
+.card-img-wrap { position:relative; height:210px; overflow:hidden; }
+.card-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+.card:hover .card-img-wrap img { transform:scale(1.05); }
+.card-img-overlay {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(to top, rgba(6,12,26,.92) 0%, rgba(6,12,26,.4) 60%, transparent 100%);
+  padding:36px 16px 14px;
+  color:var(--white); font-size:.92rem; font-weight:600; line-height:1.35;
+}
+.card-img-cat {
+  display:inline-block; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  padding:3px 10px; border-radius:20px; margin-bottom:6px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2)); color:white;
+}
+.card-content { padding:16px 20px 20px; }
+.card-excerpt { color:var(--silver); font-size:.9rem; margin-bottom:12px; line-height:1.6; }
+.card-meta    { font-size:.75rem; color:rgba(168,188,212,.6); margin-bottom:14px; }
+.read-more {
+  display:inline-block; background:transparent;
+  border:1px solid rgba(0,198,255,.4); color:var(--blue2);
+  padding:7px 16px; border-radius:8px; font-size:.82rem; font-weight:600;
+  transition:background .2s, border-color .2s;
+}
+.read-more:hover { background:rgba(0,198,255,.1); border-color:var(--blue2); }
+
+/* ── Category nav pills ── */
+.cats-nav { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:28px; }
+.cats-nav a {
+  background:var(--navy2); border:1px solid rgba(0,198,255,.15);
+  color:var(--silver); padding:6px 18px; border-radius:20px; font-size:.82rem; font-weight:500;
+  transition:all .2s;
+}
+.cats-nav a:hover, .cats-nav a.active {
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white; border-color:transparent;
+}
+
+/* ── Subscribe CTA banner ── */
+.subscribe-cta {
+  background:linear-gradient(135deg,var(--navy3) 0%,var(--navy4) 100%);
+  border:1px solid rgba(0,198,255,.2);
+  border-radius:16px; padding:36px 40px;
+  display:flex; align-items:center; justify-content:space-between; gap:24px;
+  margin:40px 0; flex-wrap:wrap;
+  box-shadow:0 0 40px rgba(0,198,255,.06);
+}
+.subscribe-cta-text h3 { font-size:1.4rem; font-weight:800; color:var(--white); margin-bottom:6px; }
+.subscribe-cta-text p  { color:var(--silver); font-size:.92rem; }
+.cta-btn {
+  background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 100%);
+  color:white; font-weight:700; font-size:.95rem; padding:13px 28px;
+  border-radius:10px; white-space:nowrap; letter-spacing:.02em;
+  box-shadow:0 4px 20px rgba(0,198,255,.3);
+  transition:box-shadow .2s, transform .2s;
+}
+.cta-btn:hover { box-shadow:0 6px 28px rgba(0,198,255,.5); transform:translateY(-1px); }
+
+/* ── Article page ── */
+.article-page .container { max-width:860px; }
+.article-hero {
+  position:relative; width:100%; border-radius:16px; overflow:hidden;
+  margin:28px 0 32px; height:430px;
+}
+.article-hero img { width:100%; height:100%; object-fit:cover; display:block; }
+.article-hero-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(6,12,26,.92) 0%, rgba(6,12,26,.45) 50%, rgba(6,12,26,.1) 100%);
+  display:flex; flex-direction:column; justify-content:flex-end; padding:36px 36px;
+  color:var(--white);
+}
+.article-hero-cat {
+  display:inline-block;
+  background:linear-gradient(135deg,var(--blue),var(--blue2)); color:white;
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  padding:4px 14px; border-radius:20px; margin-bottom:14px; width:fit-content;
+}
+.article-hero-title { font-size:2.1rem; font-weight:800; line-height:1.22; text-shadow:0 2px 10px rgba(0,0,0,.5); }
+.article-hero-meta  { margin-top:12px; font-size:.83rem; color:var(--silver); }
+.article-body {
+  background:var(--navy2); padding:40px; border-radius:16px;
+  border:1px solid rgba(0,198,255,.1);
+  font-size:1.08rem; line-height:1.85; margin-bottom:30px; color:var(--silver2);
+}
+.article-body p { margin-bottom:1.5em; }
+.article-body p:last-child { margin-bottom:0; }
+.source-link { text-align:center; margin-top:28px; padding-top:22px; border-top:1px solid rgba(0,198,255,.12); }
+.source-link a { color:var(--blue2); font-size:.9rem; }
+.back-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--navy2); border:1px solid rgba(0,198,255,.2);
+  color:var(--blue2); padding:9px 20px; border-radius:8px; margin:24px 0 0;
+  font-size:.88rem; font-weight:600; transition:all .2s;
+}
+.back-btn:hover { background:rgba(0,198,255,.08); border-color:var(--blue2); }
+
+/* ── Redirect / countdown box ── */
+.redirect-box{background:var(--navy2);border:1px solid rgba(0,198,255,.2);border-radius:14px;padding:36px 28px;text-align:center;margin:36px 0;}
+.redirect-icon{font-size:2.4rem;margin-bottom:14px;}
+.redirect-box p{color:var(--silver);font-size:.95rem;margin-bottom:20px;line-height:1.7;}
+.redirect-box p strong{color:var(--white);}
+.btn-skip{display:inline-block;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:.92rem;font-weight:700;padding:13px 30px;border-radius:10px;text-decoration:none;letter-spacing:.02em;margin-bottom:20px;transition:opacity .2s;}
+.btn-skip:hover{opacity:.85;}
+.redirect-progress{background:rgba(255,255,255,.07);border-radius:4px;height:5px;margin-top:16px;overflow:hidden;}
+.redirect-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue2));width:0%;transition:width 1s linear;border-radius:4px;}
+.article-clock{text-align:right;padding:10px 0 6px;font-size:.8rem;color:var(--silver);letter-spacing:.04em;}
+
+/* ── Footer ── */
+footer {
+  background:var(--navy2);
+  border-top:1px solid rgba(0,198,255,.12);
+  color:var(--silver); padding:50px 0 28px; margin-top:60px;
+}
+.footer-grid {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1.2fr; gap:40px;
+  padding-bottom:36px; border-bottom:1px solid rgba(0,198,255,.1);
+  margin-bottom:24px;
+}
+.footer-brand .logo-text { font-size:1.3rem; font-weight:800; color:var(--white); }
+.footer-brand .logo-text span { color:var(--blue2); }
+.footer-brand p { color:var(--silver); font-size:.85rem; line-height:1.7; margin-top:12px; max-width:280px; }
+.footer-col h4 { color:var(--white); font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px; }
+.footer-col a { display:block; color:var(--silver); font-size:.85rem; margin-bottom:8px; transition:color .2s; }
+.footer-col a:hover { color:var(--blue2); }
+.footer-col .contact-item { display:flex; align-items:flex-start; gap:8px; font-size:.84rem; color:var(--silver); margin-bottom:10px; }
+.footer-col .contact-item a { color:var(--blue2); }
+.footer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:.78rem; color:rgba(168,188,212,.5); }
+.footer-bottom a { color:rgba(168,188,212,.7); margin:0 8px; }
+.footer-bottom a:hover { color:var(--blue2); }
+
+/* ── Page hero (category/static) ── */
+.page-hero {
+  background:linear-gradient(135deg,var(--navy3),var(--navy4));
+  border-bottom:1px solid rgba(0,198,255,.12);
+  padding:40px 0 36px;
+}
+.page-hero h1 { font-size:2rem; font-weight:800; color:var(--white); }
+.page-hero p  { color:var(--silver); font-size:.95rem; margin-top:8px; }
+
+/* ── Static page content box ── */
+.content-box {
+  background:var(--navy2); padding:36px; border-radius:16px;
+  border:1px solid rgba(0,198,255,.1); font-size:1.03rem;
+  line-height:1.8; color:var(--silver2); margin:30px 0;
+}
+.content-box a { color:var(--blue2); }
+.content-box h3 { color:var(--white); font-size:1.1rem; margin:24px 0 10px; }
+
+@media(max-width:900px) {
+  .footer-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:768px) {
+  .grid { grid-template-columns:1fr; }
+  .hero-banner img { height:220px; }
+  .hero-banner { max-height:220px; }
+  .article-hero { height:260px; }
+  .article-hero-title { font-size:1.4rem; }
+  .article-hero-overlay { padding:20px; }
+  header .inner { flex-direction:column; align-items:flex-start; }
+  .subscribe-cta { flex-direction:column; }
+  .footer-grid { grid-template-columns:1fr; gap:24px; }
+  .footer-bottom { flex-direction:column; text-align:center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Breaking News Ticker -->
+<div class="ticker-wrap">
+  <div class="container">
+    <div class="ticker-inner">
+      <span class="ticker-label">Breaking</span>
+      <div class="ticker-track">
+        <div class="ticker-items">
+          <span>Anthropic’s Claude Tag is learning your company, one Slack message at a time</span><span>Password manager maker LastPass says hackers stole customer support case data during Klue breach</span><span>HaloBraid raises $7M from Seven Seven Six to end the six-hour hair salon appointment</span><span>Meta debuts new, cheaper smart glasses under its own brand</span><span>4 days left to save up to $190 on TechCrunch Founder Summit 2026</span><span>Ribbie turns real-time baseball stats into arcade-like, pixel-art broadcasts</span><span>Fika Jobs raises $4M to build a video-first hiring platform where AI agents interview candidates</span><span>The running list: major tech layoffs in 2026 where employers cited AI</span>
+          <span>Anthropic’s Claude Tag is learning your company, one Slack message at a time</span><span>Password manager maker LastPass says hackers stole customer support case data during Klue breach</span><span>HaloBraid raises $7M from Seven Seven Six to end the six-hour hair salon appointment</span><span>Meta debuts new, cheaper smart glasses under its own brand</span><span>4 days left to save up to $190 on TechCrunch Founder Summit 2026</span><span>Ribbie turns real-time baseball stats into arcade-like, pixel-art broadcasts</span><span>Fika Jobs raises $4M to build a video-first hiring platform where AI agents interview candidates</span><span>The running list: major tech layoffs in 2026 where employers cited AI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<header>
+  <div class="container">
+    <div class="inner">
+      <a href="/" class="logo-wrap" style="text-decoration:none;">
+        <img src="/images/logo.png" alt="Tech Brief"
+             onerror="this.style.display='none'">
+        <span class="logo-text">Tech<span>Brief</span></span>
+      </a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/category/ai-machine-learning.html">AI</a><a href="/category/big-tech.html">Big Tech</a><a href="/category/cybersecurity.html">Cybersecurity</a><a href="/category/technology.html">Technology</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span class="live-dot">Live</span>
+        <form class="search-bar" onsubmit="var q=this.querySelector('input').value.trim();if(q)window.location.href='/?q='+encodeURIComponent(q);return false;">
+          <input type="text" name="q" placeholder="Search news…">
+          <button type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ── Hero Banner ───────────────────────────────── -->
+<div class="hero-banner">
+  <div class="hero-banner-inner">
+    <img src="/images/hero-banner.png"
+         alt="Trending Technology News – Real Time, Real News"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div style="display:none;width:100%;height:120px;background:linear-gradient(135deg,#0a1a3a,#060c1a);align-items:center;justify-content:center;">
+      <span style="color:rgba(0,198,255,.4);font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;">⚡ TechBrief — Real Time. Real News.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Live Clock Bar ─────────────────────────────── -->
+<div style="background:var(--navy2);border-bottom:1px solid rgba(0,198,255,.1);padding:8px 0;">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="color:rgba(255,68,68,.9);font-size:.65rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.3);padding:3px 10px;border-radius:20px;">⚡ LIVE</span>
+      <span style="color:var(--silver);font-size:.78rem;">Breaking tech news · Updated every hour</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;font-family:'Courier New',monospace;background:rgba(0,198,255,.06);border:1px solid rgba(0,198,255,.2);padding:5px 14px;border-radius:8px;">
+      <span style="font-size:1.55rem;font-weight:900;color:var(--blue2);text-shadow:0 0 16px rgba(0,198,255,.8),0 0 4px rgba(0,198,255,.5);letter-spacing:.04em;" id="clock-h">--</span>
+      <span style="font-size:1.55rem;font-weight:900;color:rgba(0,198,255,.6);animation:colonBlink .9s step-end infinite;line-height:1;">:</span>
+      <span style="font-size:1.55rem;font-weight:900;color:var(--blue2);text-shadow:0 0 16px rgba(0,198,255,.8),0 0 4px rgba(0,198,255,.5);letter-spacing:.04em;" id="clock-m">--</span>
+      <span style="font-size:1.55rem;font-weight:900;color:rgba(0,198,255,.6);animation:colonBlink .9s step-end infinite;line-height:1;">:</span>
+      <span style="font-size:1rem;font-weight:800;color:rgba(0,198,255,.7);align-self:flex-end;padding-bottom:2px;" id="clock-s">--</span>
+      <span style="font-size:.85rem;font-weight:800;color:var(--blue2);margin-left:2px;align-self:flex-end;padding-bottom:3px;" id="clock-ampm"></span>
+      <span style="font-size:.75rem;color:var(--silver);margin-left:10px;align-self:center;" id="clock-date"></span>
+    </div>
+  </div>
+</div>
+<style>@keyframes colonBlink{0%,100%{opacity:1;}50%{opacity:.15;}}</style>
+
+<!-- ── Category Icons Row ─────────────────────────── -->
+<div class="cat-icons-row">
+  <div class="container">
+    <div class="cat-icons-inner">
+      <a href="/category/ai-machine-learning.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🤖</div><span>AI &amp; Innovation</span>
+      </a>
+      <a href="/category/cybersecurity.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🔐</div><span>Cybersecurity</span>
+      </a>
+      <a href="/category/technology.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">📱</div><span>Gadgets &amp; Reviews</span>
+      </a>
+      <a href="/category/big-tech.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🏢</div><span>Big Tech</span>
+      </a>
+      <a href="/category/startups-vc.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">🚀</div><span>Startups &amp; VC</span>
+      </a>
+      <a href="/category/technology.html" class="cat-icon-item" style="text-decoration:none;">
+        <div class="icon-circle">☁️</div><span>Cloud &amp; Future Tech</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  
+
+  <!-- Category filter pills -->
+  <div class="section-header" style="margin-top:36px;">
+    <h2>Latest Stories</h2>
+    <a href="/feed.xml">RSS Feed →</a>
+  </div>
+  <div class="cats-nav">
+    <a href="/" class="active">All</a>
+    
+    <a href="/category/ai-machine-learning.html">AI & Machine Learning</a>
+    
+    <a href="/category/big-tech.html">Big Tech</a>
+    
+    <a href="/category/cybersecurity.html">Cybersecurity</a>
+    
+    <a href="/category/technology.html">Technology</a>
+    
+  </div>
+
+  <!-- Article grid -->
+  <div class="grid">
+    
+    <div class="card">
+      <a href="/article/de7f6c1c-anthropic-s-claude-tag-is-learning-your-company-one-slack-message-at-a-time.html">
+        <div class="card-img-wrap">
+          <img src="/images/anthropic-s-claude-tag-is-learning-your-company-one-slack-message-at-a-time.jpg" alt="Anthropic’s Claude Tag is learning your company, one Slack message at a time" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Anthropic’s Claude Tag is learning your company, one Slack message at a time</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Anthropic’s new Claude Tag brings an always-on AI teammate to Slack. But beyond productivity, the feature is a strategic play to capture organizational context, institutional knowledge, and enterprise workflows.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 17:00:00 +0000</div>
+        <a href="/article/de7f6c1c-anthropic-s-claude-tag-is-learning-your-company-one-slack-message-at-a-time.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/e6ce5f39-password-manager-maker-lastpass-says-hackers-stole-customer-support-case-data-du.html">
+        <div class="card-img-wrap">
+          <img src="/images/password-manager-maker-lastpass-says-hackers-stole-customer-support-case-data-du.jpg" alt="Password manager maker LastPass says hackers stole customer support case data during Klue breach" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">Cybersecurity</span>
+            <div>Password manager maker LastPass says hackers stole customer support case data during Klue breach</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">This is the second data breach to affect LastPass customers in recent years, after one of the password manager's tech partners was recently breached.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 15:12:37 +0000</div>
+        <a href="/article/e6ce5f39-password-manager-maker-lastpass-says-hackers-stole-customer-support-case-data-du.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/632eb5ed-halobraid-raises-7m-from-seven-seven-six-to-end-the-six-hour-hair-salon-appointm.html">
+        <div class="card-img-wrap">
+          <img src="/images/halobraid-raises-7m-from-seven-seven-six-to-end-the-six-hour-hair-salon-appointm.jpg" alt="HaloBraid raises $7M from Seven Seven Six to end the six-hour hair salon appointment" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>HaloBraid raises $7M from Seven Seven Six to end the six-hour hair salon appointment</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">HaloBraid aims to help salons speed up braiding with its first device, slated to launch later this year, that acts as a braiding assistant for professional stylists.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 15:09:38 +0000</div>
+        <a href="/article/632eb5ed-halobraid-raises-7m-from-seven-seven-six-to-end-the-six-hour-hair-salon-appointm.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/bb9e22d3-meta-debuts-new-cheaper-smart-glasses-under-its-own-brand.html">
+        <div class="card-img-wrap">
+          <img src="/images/meta-debuts-new-cheaper-smart-glasses-under-its-own-brand.jpg" alt="Meta debuts new, cheaper smart glasses under its own brand" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Meta debuts new, cheaper smart glasses under its own brand</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">The smart glasses are available in several countries starting today in a variety of color and lens combinations.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 14:11:23 +0000</div>
+        <a href="/article/bb9e22d3-meta-debuts-new-cheaper-smart-glasses-under-its-own-brand.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/7637834a-4-days-left-to-save-up-to-190-on-techcrunch-founder-summit-2026.html">
+        <div class="card-img-wrap">
+          <img src="/images/4-days-left-to-save-up-to-190-on-techcrunch-founder-summit-2026.jpg" alt="4 days left to save up to $190 on TechCrunch Founder Summit 2026" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">Technology</span>
+            <div>4 days left to save up to $190 on TechCrunch Founder Summit 2026</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Four days left to save up to $190 on your pass to TechCrunch Founder Summit 2026 — the ultimate founder bootcamp — before Early Bird rates end on June 26 at 11:59 p.m. PT. Register today.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 14:00:00 +0000</div>
+        <a href="/article/7637834a-4-days-left-to-save-up-to-190-on-techcrunch-founder-summit-2026.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/3b5ca3da-ribbie-turns-real-time-baseball-stats-into-arcade-like-pixel-art-broadcasts.html">
+        <div class="card-img-wrap">
+          <img src="/images/ribbie-turns-real-time-baseball-stats-into-arcade-like-pixel-art-broadcasts.jpg" alt="Ribbie turns real-time baseball stats into arcade-like, pixel-art broadcasts" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">Technology</span>
+            <div>Ribbie turns real-time baseball stats into arcade-like, pixel-art broadcasts</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Ribbie lets you follow along live with MLB games with a delightful, arcade-inspired interface.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 13:58:30 +0000</div>
+        <a href="/article/3b5ca3da-ribbie-turns-real-time-baseball-stats-into-arcade-like-pixel-art-broadcasts.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/9a15d3b4-fika-jobs-raises-4m-to-build-a-video-first-hiring-platform-where-ai-agents-inter.html">
+        <div class="card-img-wrap">
+          <img src="/images/fika-jobs-raises-4m-to-build-a-video-first-hiring-platform-where-ai-agents-inter.jpg" alt="Fika Jobs raises $4M to build a video-first hiring platform where AI agents interview candidates" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Fika Jobs raises $4M to build a video-first hiring platform where AI agents interview candidates</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Fika Jobs, a Stockholm-based startup, has raised $4M in funding to develop a novel approach to the recruitment process. The company's innovative solution leverages AI-powered interview agents and short-form video profiles to create a platfo…</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 13:00:00 +0000</div>
+        <a href="/article/9a15d3b4-fika-jobs-raises-4m-to-build-a-video-first-hiring-platform-where-ai-agents-inter.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/481dc1a1-the-running-list-major-tech-layoffs-in-2026-where-employers-cited-ai.html">
+        <div class="card-img-wrap">
+          <img src="/images/the-running-list-major-tech-layoffs-in-2026-where-employers-cited-ai.jpg" alt="The running list: major tech layoffs in 2026 where employers cited AI" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>The running list: major tech layoffs in 2026 where employers cited AI</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">A running look — in reverse chronological order — at the bigger tech companies that have announced significant layoffs this year with AI as a stated factor.</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 01:27:55 +0000</div>
+        <a href="/article/481dc1a1-the-running-list-major-tech-layoffs-in-2026-where-employers-cited-ai.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/3a35a395-openai-launches-new-initiative-to-help-find-and-patch-open-source-bugs.html">
+        <div class="card-img-wrap">
+          <img src="/images/openai-launches-new-initiative-to-help-find-and-patch-open-source-bugs.jpg" alt="OpenAI launches new initiative to help find and patch open source bugs" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>OpenAI launches new initiative to help find and patch open source bugs</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">OpenAI has launched a new initiative aimed at assisting the open source community in identifying and patching vulnerabilities in their software. This effort is part of the organization's commitment to promoting digital security and stabilit…</div>
+        <div class="card-meta">🕐 Tue, 23 Jun 2026 00:11:31 +0000</div>
+        <a href="/article/3a35a395-openai-launches-new-initiative-to-help-find-and-patch-open-source-bugs.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/f9fa2acf-tesla-pushes-back-on-autopilot-narrative-after-fatal-texas-crash.html">
+        <div class="card-img-wrap">
+          <img src="/images/tesla-pushes-back-on-autopilot-narrative-after-fatal-texas-crash.jpg" alt="Tesla pushes back on Autopilot narrative after fatal Texas crash" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">Big Tech</span>
+            <div>Tesla pushes back on Autopilot narrative after fatal Texas crash</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Whether the Autopilot system was truly active, overridden, or malfunctioning likely won't be resolved until investigators finish combing through the vehicle's data logs.</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 22:59:57 +0000</div>
+        <a href="/article/f9fa2acf-tesla-pushes-back-on-autopilot-narrative-after-fatal-texas-crash.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/f7060364-shareholders-sue-uber-s-board-over-sexual-assaults-other-incidents.html">
+        <div class="card-img-wrap">
+          <img src="/images/shareholders-sue-uber-s-board-over-sexual-assaults-other-incidents.jpg" alt="Shareholders sue Uber’s board over sexual assaults, other incidents" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">Technology</span>
+            <div>Shareholders sue Uber’s board over sexual assaults, other incidents</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">The lawsuit, led by a Detroit pension fund, alleges Uber's board and management has cut too many compliance corners, resulting in thousands of lawsuits.</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 22:43:12 +0000</div>
+        <a href="/article/f7060364-shareholders-sue-uber-s-board-over-sexual-assaults-other-incidents.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/795f5537-the-ai-world-is-getting-loopy.html">
+        <div class="card-img-wrap">
+          <img src="/images/the-ai-world-is-getting-loopy.jpg" alt="The AI world is getting ‘loopy’" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>The AI world is getting ‘loopy’</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">A new development in artificial intelligence has sparked concerns about the potential for uncontrolled growth. The "loop" technology, recently unveiled, allows for a swarm of agents to operate continuously in the background. This means that…</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 20:53:11 +0000</div>
+        <a href="/article/795f5537-the-ai-world-is-getting-loopy.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/5f4e74eb-microsoft-and-chevron-plan-one-of-the-largest-gas-powered-data-center-projects-i.html">
+        <div class="card-img-wrap">
+          <img src="/images/microsoft-and-chevron-plan-one-of-the-largest-gas-powered-data-center-projects-i.jpg" alt="Microsoft and Chevron plan one of the largest gas-powered data center projects in US" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">Big Tech</span>
+            <div>Microsoft and Chevron plan one of the largest gas-powered data center projects in US</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Microsoft inked a 20-year power purchase agreement with Chevron, locking in decades of carbon emissions from a new natural gas power plant.</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 20:37:19 +0000</div>
+        <a href="/article/5f4e74eb-microsoft-and-chevron-plan-one-of-the-largest-gas-powered-data-center-projects-i.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/1d0066c1-ai-chipmaker-groq-confirms-650m-raise-re-staffs-after-nvidia-s-20b-not-acqui-hir.html">
+        <div class="card-img-wrap">
+          <img src="/images/ai-chipmaker-groq-confirms-650m-raise-re-staffs-after-nvidia-s-20b-not-acqui-hir.jpg" alt="AI chipmaker Groq confirms $650M raise, re-staffs after Nvidia’s $20B not-acqui-hire deal" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>AI chipmaker Groq confirms $650M raise, re-staffs after Nvidia’s $20B not-acqui-hire deal</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">AI chipmaker Groq has confirmed a $650 million fundraising round, a significant increase from the company's last funding round. This move comes on the heels of Nvidia's recent decision not to acquire Groq for $20 billion. The deal fell thro…</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 20:13:58 +0000</div>
+        <a href="/article/1d0066c1-ai-chipmaker-groq-confirms-650m-raise-re-staffs-after-nvidia-s-20b-not-acqui-hir.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/c4fff43b-nvidia-wants-to-cut-data-center-water-use-but-that-s-not-the-same-as-fixing-ai-s.html">
+        <div class="card-img-wrap">
+          <img src="/images/nvidia-wants-to-cut-data-center-water-use-but-that-s-not-the-same-as-fixing-ai-s.jpg" alt="Nvidia wants to cut data center water use, but that’s not the same as fixing AI’s water problem" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Nvidia wants to cut data center water use, but that’s not the same as fixing AI’s water problem</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Nvidia announced a new cooling system that cuts water use inside the data center. But it does nothing to address AI's biggest water use — fossil fuel power plants.</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 20:08:15 +0000</div>
+        <a href="/article/c4fff43b-nvidia-wants-to-cut-data-center-water-use-but-that-s-not-the-same-as-fixing-ai-s.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/d4d9d0dc-tata-electronics-a-major-tech-supplier-to-apple-and-tesla-confirms-data-breach.html">
+        <div class="card-img-wrap">
+          <img src="/images/tata-electronics-a-major-tech-supplier-to-apple-and-tesla-confirms-data-breach.jpg" alt="Tata Electronics, a major tech supplier to Apple and Tesla, confirms data breach" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Tata Electronics, a major tech supplier to Apple and Tesla, confirms data breach</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Tata Electronics, a leading provider of electronics components to major tech companies such as Apple and Tesla, has confirmed a data breach. The incident occurred as the company continues to expand its presence in global technology supply c…</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 19:25:00 +0000</div>
+        <a href="/article/d4d9d0dc-tata-electronics-a-major-tech-supplier-to-apple-and-tesla-confirms-data-breach.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/32fe59aa-a-new-unpatchable-flaw-in-apple-chips-opens-the-door-to-an-iphone-jailbreak.html">
+        <div class="card-img-wrap">
+          <img src="/images/a-new-unpatchable-flaw-in-apple-chips-opens-the-door-to-an-iphone-jailbreak.jpg" alt="A new unpatchable flaw in Apple chips opens the door to an iPhone jailbreak" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>A new unpatchable flaw in Apple chips opens the door to an iPhone jailbreak</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">European offensive cybersecurity company Paradigm Shift released details of a flaw and a technique to exploit it that opens the door for hackers to unlock and break into older iPhones.</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 18:50:24 +0000</div>
+        <a href="/article/32fe59aa-a-new-unpatchable-flaw-in-apple-chips-opens-the-door-to-an-iphone-jailbreak.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/0a6f3aee-google-deepmind-bets-75m-on-ai-s-future-in-hollywood-with-a24-deal.html">
+        <div class="card-img-wrap">
+          <img src="/images/google-deepmind-bets-75m-on-ai-s-future-in-hollywood-with-a24-deal.jpg" alt="Google DeepMind bets $75M on AI’s future in Hollywood with A24 deal" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Google DeepMind bets $75M on AI’s future in Hollywood with A24 deal</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Google DeepMind and A24 are teaming up to build AI filmmaking tools.</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 18:49:44 +0000</div>
+        <a href="/article/0a6f3aee-google-deepmind-bets-75m-on-ai-s-future-in-hollywood-with-a24-deal.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/64d484bc-anthropic-says-claude-may-want-to-see-your-id.html">
+        <div class="card-img-wrap">
+          <img src="/images/anthropic-says-claude-may-want-to-see-your-id.jpg" alt="Anthropic says Claude may want to see your ID" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Anthropic says Claude may want to see your ID</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Anthropic has announced that its chatbot, Claude, will soon be asking users to verify their age and identity in specific situations. According to the company's updated privacy policy, this verification process is intended to ensure complian…</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 18:05:13 +0000</div>
+        <a href="/article/64d484bc-anthropic-says-claude-may-want-to-see-your-id.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <a href="/article/42cb168b-amazon-is-testing-alexa-in-india-with-hindi-support.html">
+        <div class="card-img-wrap">
+          <img src="/images/amazon-is-testing-alexa-in-india-with-hindi-support.jpg" alt="Amazon is testing Alexa+ in India with Hindi support" loading="lazy">
+          <div class="card-img-overlay">
+            <span class="card-img-cat">AI & Machine Learning</span>
+            <div>Amazon is testing Alexa+ in India with Hindi support</div>
+          </div>
+        </div>
+      </a>
+      <div class="card-content">
+        <div class="card-excerpt">Amazon has announced plans to expand its new conversational AI assistant, Alexa+, to India. As part of this move, the company will be testing a Hindi-language version of Alexa+. This expansion marks an important step for Amazon's efforts to…</div>
+        <div class="card-meta">🕐 Mon, 22 Jun 2026 17:31:29 +0000</div>
+        <a href="/article/42cb168b-amazon-is-testing-alexa-in-india-with-hindi-support.html" class="read-more">Read full story →</a>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Subscribe CTA -->
+  <div class="subscribe-cta">
+    <div class="subscribe-cta-text">
+      <h3>🔔 Subscribe &amp; Stay Ahead of the Future</h3>
+      <p>Get the latest tech news delivered to your inbox — the stories that matter, in your language.</p>
+    </div>
+    <a href="/contact.html" class="cta-btn">Subscribe Now →</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo-text">Tech<span>Brief</span></div>
+        <p>Original tech news updated every hour. Full-length articles powered by a local LLM — unique insights on the stories that matter.</p>
+        <div style="display:flex;gap:14px;margin-top:18px;">
+          <a href="/feed.xml" style="color:var(--blue2);font-size:.82rem;font-weight:600;border:1px solid rgba(0,198,255,.3);padding:6px 14px;border-radius:8px;">RSS Feed</a>
+          <a href="/contact.html" style="color:var(--blue2);font-size:.82rem;font-weight:600;border:1px solid rgba(0,198,255,.3);padding:6px 14px;border-radius:8px;">Subscribe</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Sections</h4>
+        <a href="/">All News</a>
+        <a href="/category/ai-machine-learning.html">AI &amp; ML</a>
+        <a href="/category/cybersecurity.html">Cybersecurity</a>
+        <a href="/category/startups-vc.html">Startups &amp; VC</a>
+        <a href="/category/big-tech.html">Big Tech</a>
+        <a href="/category/technology.html">Gadgets</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="/about.html">About TechBrief</a>
+        <a href="/contact.html">Contact Us</a>
+        <a href="/feed.xml">RSS Feed</a>
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy Policy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms of Service</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <div class="contact-item">📧 <a href="mailto:voltixio_editor@voltixio.com">voltixio_editor@voltixio.com</a></div>
+        <div class="contact-item">📞 <span>(443) 853-1405</span></div>
+        <div class="contact-item">📍 <span>Windsor Ave, Baltimore MD 21216</span></div>
+        <div class="contact-item" style="margin-top:8px;">
+          <a href="https://voltixio.com" target="_blank" style="color:var(--blue2);font-size:.82rem;">voltixio.com ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 AI Tech Brief · A Voltixio Publication · Original coverage. Sources linked.</span>
+      <div>
+        <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy</a>
+        <a href="https://learnai.voltixio.com/tos" target="_blank">Terms</a>
+        <a href="/sitemap.xml">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function tick(){
+  var n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
+  var ap=h>=12?'PM':'AM';h=h%12||12;
+  var p=function(x){return String(x).padStart(2,'0');};
+  var el=function(id){return document.getElementById(id);};
+  if(el('clock-h'))el('clock-h').textContent=p(h);
+  if(el('clock-m'))el('clock-m').textContent=p(m);
+  if(el('clock-s'))el('clock-s').textContent=p(s);
+  if(el('clock-ampm'))el('clock-ampm').textContent=ap;
+  var D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(el('clock-date'))el('clock-date').textContent=D[n.getDay()]+' '+M[n.getMonth()]+' '+n.getDate()+', '+n.getFullYear();
+  setTimeout(tick,1000);
+})();
+</script>
+</body>
+</html>
