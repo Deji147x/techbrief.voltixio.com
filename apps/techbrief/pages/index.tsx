@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { ArticleCard } from '../components/ArticleCard';
-import { AIAssistant } from '../components/AIAssistant';
-import { OpposingViews } from '../components/OpposingViews';
+import { LiveClock } from '../components/LiveClock';
 import { Article, getArticles } from '../lib/api';
 
-type Tab = 'feed' | 'ai-assistant' | 'opposing-views';
+const CATEGORY_ICONS: Record<string, string> = {
+  'AI & Machine Learning': '🤖',
+  Cybersecurity: '🛡️',
+  'Startups & VC': '🚀',
+  'Big Tech': '🏢',
+  'Gadgets & Hardware': '📱',
+  'Space & Science': '🛰️',
+  Technology: '💻',
+};
 
 export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('feed');
+  const [activeCategory, setActiveCategory] = useState<string>('All');
 
   useEffect(() => {
     getArticles()
@@ -19,41 +25,116 @@ export default function Home() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const handleSelect = (id: string) => {
-    setSelectedArticle(id);
-    setTab('ai-assistant');
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    articles.forEach((a) => set.add(a.aiLabel[0] || 'Technology'));
+    return Array.from(set);
+  }, [articles]);
+
+  const filtered = useMemo(() => {
+    if (activeCategory === 'All') return articles;
+    return articles.filter((a) => (a.aiLabel[0] || 'Technology') === activeCategory);
+  }, [articles, activeCategory]);
+
+  const heroArticle = articles[0];
+  const gridArticles = activeCategory === 'All' ? filtered.slice(1) : filtered;
+
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: articles.slice(0, 20).map((a, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `https://techbrief.voltixio.com/article/${a.id}`,
+      name: a.title,
+    })),
   };
 
   return (
-    <Layout>
-      <div className="flex gap-2 mb-6">
-        {(['feed', 'ai-assistant', 'opposing-views'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              tab === t ? 'bg-blue-600 text-white' : 'bg-white text-slate-600'
-            }`}
-          >
-            {t.replace('-', ' ')}
-          </button>
-        ))}
-      </div>
+    <Layout tickerArticles={articles.slice(0, 8)} canonicalPath="/" ogImage={heroArticle?.imageUrl || undefined}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
 
-      {tab === 'feed' && (
-        isLoading ? (
-          <p className="text-slate-500">Loading articles...</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} onSelect={handleSelect} />
-            ))}
+      {heroArticle?.imageUrl && (
+        <div className="hero-banner">
+          <div className="hero-banner-inner">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroArticle.imageUrl} alt={heroArticle.title} />
           </div>
-        )
+        </div>
       )}
 
-      {tab === 'ai-assistant' && <AIAssistant articleId={selectedArticle} />}
-      {tab === 'opposing-views' && <OpposingViews articleId={selectedArticle} />}
+      <div className="clock-bar">
+        <div className="container inner">
+          <span className="live-badge">Updated Hourly</span>
+          <LiveClock />
+        </div>
+      </div>
+
+      {categories.length > 0 && (
+        <div className="cat-icons-row">
+          <div className="container cat-icons-inner">
+            {categories.map((cat) => (
+              <div key={cat} className="cat-icon-item" onClick={() => setActiveCategory(cat)}>
+                <span className="icon-circle">{CATEGORY_ICONS[cat] || '💻'}</span>
+                {cat}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="container">
+        <div className="section-header">
+          <h2>Latest Stories</h2>
+          <a href="/rss.xml">RSS Feed →</a>
+        </div>
+
+        <div className="cats-nav">
+          <a
+            className={activeCategory === 'All' ? 'active' : ''}
+            onClick={() => setActiveCategory('All')}
+            href="#"
+          >
+            All
+          </a>
+          {categories.map((cat) => (
+            <a
+              key={cat}
+              className={activeCategory === cat ? 'active' : ''}
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveCategory(cat);
+              }}
+              href="#"
+            >
+              {cat}
+            </a>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <p style={{ color: 'var(--silver)' }}>Loading articles...</p>
+        ) : (
+          <div className="grid">
+            {gridArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        )}
+
+        <div className="subscribe-cta">
+          <div className="subscribe-cta-text">
+            <h3>Never miss a breaking story</h3>
+            <p>AI-curated tech news, rewritten and delivered hourly — straight to the point.</p>
+          </div>
+          <a href="mailto:hello@voltixio.com?subject=Subscribe" className="cta-btn">
+            Subscribe Free
+          </a>
+        </div>
+      </div>
     </Layout>
   );
 }
