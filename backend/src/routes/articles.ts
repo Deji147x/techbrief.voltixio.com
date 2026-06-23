@@ -57,11 +57,11 @@ articlesRouter.get('/:id/opposing-views', async (req, res) => {
 
 articlesRouter.post('/:id/engagement', async (req, res) => {
   try {
-    const { type, userId } = req.body as { type?: string; userId?: string };
+    const { type, userId, visitorId } = req.body as { type?: string; userId?: string; visitorId?: string };
     if (type !== 'view' && type !== 'read' && type !== 'share') {
       return res.status(400).json({ error: 'Invalid engagement type' });
     }
-    await recordEngagement(req.params.id, type, userId);
+    await recordEngagement(req.params.id, type, userId, visitorId);
     res.status(204).end();
   } catch (err) {
     console.error(err);

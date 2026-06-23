@@ -34,9 +34,10 @@ export async function getOpposingViews(articleId: string) {
 }
 
 export async function recordEngagement(articleId: string, type: 'view' | 'read' | 'share') {
+  const { getVisitorId } = await import('./analytics');
   await fetch(`${API_URL}/articles/${articleId}/engagement`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type }),
+    body: JSON.stringify({ type, visitorId: getVisitorId() }),
   }).catch((err) => console.error('Failed to record engagement:', err));
 }
