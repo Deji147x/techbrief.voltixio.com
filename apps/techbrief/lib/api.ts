@@ -21,6 +21,14 @@ export async function getArticles(search?: string): Promise<Article[]> {
   return data.articles;
 }
 
+export async function getArticle(articleId: string): Promise<Article | null> {
+  const res = await fetch(`${API_URL}/articles/${articleId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('Failed to load article');
+  const data = await res.json();
+  return data.article;
+}
+
 export async function getAIContent(articleId: string) {
   const res = await fetch(`${API_URL}/articles/${articleId}/ai`);
   if (!res.ok) throw new Error('Failed to load AI content');

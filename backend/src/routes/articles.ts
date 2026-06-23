@@ -27,6 +27,17 @@ articlesRouter.get('/', async (req, res) => {
   }
 });
 
+articlesRouter.get('/:id', async (req, res) => {
+  try {
+    const article = await prisma.article.findUnique({ where: { id: req.params.id } });
+    if (!article) return res.status(404).json({ error: 'Article not found' });
+    res.json({ article });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load article' });
+  }
+});
+
 articlesRouter.get('/:id/ai', async (req, res) => {
   try {
     const article = await prisma.article.findUnique({ where: { id: req.params.id } });
