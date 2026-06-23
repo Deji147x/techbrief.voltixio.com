@@ -2,6 +2,16 @@ import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { Article } from '../lib/api';
+import { categorySlug } from '../lib/categories';
+
+const SECTIONS = [
+  'AI & Machine Learning',
+  'Cybersecurity',
+  'Startups & VC',
+  'Big Tech',
+  'Gadgets & Hardware',
+  'Space & Science',
+];
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -87,8 +97,12 @@ export function Layout({
           </div>
           <nav>
             <Link href="/">Home</Link>
+            {SECTIONS.map((s) => (
+              <Link key={s} href={`/category/${categorySlug(s)}`}>
+                {s.split(' &')[0]}
+              </Link>
+            ))}
             <Link href="/about">About</Link>
-            <Link href="/contact">Contact</Link>
           </nav>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span className="live-dot">Live</span>
@@ -114,9 +128,11 @@ export function Layout({
             <div className="footer-col">
               <h4>Sections</h4>
               <Link href="/">Latest</Link>
-              <Link href="/">AI &amp; Machine Learning</Link>
-              <Link href="/">Cybersecurity</Link>
-              <Link href="/">Big Tech</Link>
+              {SECTIONS.map((s) => (
+                <Link key={s} href={`/category/${categorySlug(s)}`}>
+                  {s}
+                </Link>
+              ))}
             </div>
             <div className="footer-col">
               <h4>Company</h4>
