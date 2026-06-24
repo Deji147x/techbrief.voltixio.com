@@ -42,13 +42,5 @@ services:
       - postgres
       - redis
 
-  techbrief:
-    build: ./apps/techbrief
-    env_file: ./apps/techbrief/.env.local
-    depends_on:
-      - backend
-    ports:
-      - '3000:3000'
-
 volumes:
   postgres_data:
