@@ -34,6 +34,8 @@ services:
     build: ./backend
     env_file: ./backend/.env
     command: npm run rss:poll
+    volumes:
+      - ./feeds.txt:/feeds.txt:ro
     depends_on:
       - postgres
       - redis
