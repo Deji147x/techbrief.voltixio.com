@@ -21,6 +21,14 @@ export async function getArticles(search?: string): Promise<Article[]> {
   return data.articles;
 }
 
+export async function getArticle(articleId: string): Promise<Article | null> {
+  const res = await fetch(`${API_URL}/articles/${articleId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('Failed to load article');
+  const data = await res.json();
+  return data.article;
+}
+
 export async function getAIContent(articleId: string) {
   const res = await fetch(`${API_URL}/articles/${articleId}/ai`);
   if (!res.ok) throw new Error('Failed to load AI content');
@@ -34,9 +42,10 @@ export async function getOpposingViews(articleId: string) {
 }
 
 export async function recordEngagement(articleId: string, type: 'view' | 'read' | 'share') {
+  const { getVisitorId } = await import('./analytics');
   await fetch(`${API_URL}/articles/${articleId}/engagement`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type }),
+    body: JSON.stringify({ type, visitorId: getVisitorId() }),
   }).catch((err) => console.error('Failed to record engagement:', err));
 }

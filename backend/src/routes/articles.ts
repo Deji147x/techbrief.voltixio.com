@@ -27,6 +27,17 @@ articlesRouter.get('/', async (req, res) => {
   }
 });
 
+articlesRouter.get('/:id', async (req, res) => {
+  try {
+    const article = await prisma.article.findUnique({ where: { id: req.params.id } });
+    if (!article) return res.status(404).json({ error: 'Article not found' });
+    res.json({ article });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load article' });
+  }
+});
+
 articlesRouter.get('/:id/ai', async (req, res) => {
   try {
     const article = await prisma.article.findUnique({ where: { id: req.params.id } });
@@ -57,11 +68,11 @@ articlesRouter.get('/:id/opposing-views', async (req, res) => {
 
 articlesRouter.post('/:id/engagement', async (req, res) => {
   try {
-    const { type, userId } = req.body as { type?: string; userId?: string };
+    const { type, userId, visitorId } = req.body as { type?: string; userId?: string; visitorId?: string };
     if (type !== 'view' && type !== 'read' && type !== 'share') {
       return res.status(400).json({ error: 'Invalid engagement type' });
     }
-    await recordEngagement(req.params.id, type, userId);
+    await recordEngagement(req.params.id, type, userId, visitorId);
     res.status(204).end();
   } catch (err) {
     console.error(err);

@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { articlesRouter } from './routes/articles';
+import { analyticsRouter } from './routes/analytics';
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use(rateLimit({ windowMs: 60_000, max: 120 }));
 
 app.use('/articles', articlesRouter);
+app.use('/analytics', analyticsRouter);
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 

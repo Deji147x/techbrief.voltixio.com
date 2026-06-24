@@ -26,13 +26,21 @@ services:
     ports:
       - '4000:4000'
 
-  techbrief:
-    build: ./apps/techbrief
-    env_file: ./apps/techbrief/.env.local
+  rss-poller:
+    build: ./backend
+    env_file: ./backend/.env
+    command: npm run rss:poll
     depends_on:
-      - backend
-    ports:
-      - '3000:3000'
+      - postgres
+      - redis
+
+  ai-processor:
+    build: ./backend
+    env_file: ./backend/.env
+    command: npm run ai:process
+    depends_on:
+      - postgres
+      - redis
 
 volumes:
   postgres_data:
