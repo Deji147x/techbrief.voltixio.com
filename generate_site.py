@@ -27,12 +27,12 @@ from email.utils import formatdate
 from jinja2 import Template
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-RSS_URL           = "http://localhost:8001/uglyfeed.xml"
+RSS_URL           = "/root/uglyfeed/output/uglyfeed.xml"
 OUTPUT_DIR        = "/var/www/techbrief_static"
 ARTICLES_PER_PAGE = 20
 SITE_URL          = "https://techbrief.voltixio.com"
 SITE_TITLE        = "AI Tech Brief"
-SITE_DESCRIPTION  = "AI‑rewritten tech news and insights, updated hourly."
+SITE_DESCRIPTION  = "Breaking tech news and insights, updated hourly."
 SITE_AUTHOR       = "AI Tech Brief"
 CONTACT_EMAIL     = "editor@techbrief.voltixio.com"
 
@@ -45,7 +45,7 @@ ENABLE_ADS        = False                     # set True once AdSense account is
 
 # ── Ollama settings ───────────────────────────────────────────────────────────
 OLLAMA_URL        = "http://localhost:11434"   # change if Ollama runs elsewhere
-OLLAMA_MODEL      = "gemma2:9b"                # excellent at following tone instructions
+OLLAMA_MODEL      = "llama3.2"                 # lighter model, stable across all articles
 OLLAMA_TIMEOUT    = 180                        # seconds per article — increase if GPU is slow
 REWRITE_CACHE     = os.path.join(OUTPUT_DIR, ".rewrite_cache.json")
 
@@ -93,31 +93,299 @@ def detect_category(title: str, summary: str) -> str:
     return "Technology"
 
 
-def image_id_for_keyword(keyword: str) -> int:
-    hex8 = hashlib.md5(keyword.encode()).hexdigest()[:8]
-    return int(hex8, 16) % 1000
+# ── Branded image generation (Pillow) ────────────────────────────────────────
+
+# Category gradient palettes  [top-left, bottom-right, accent]
+CAT_PALETTES = {
+    "AI & Machine Learning": [(5, 15, 40),   (15, 5, 50),   (0, 198, 255)],
+    "Cybersecurity":         [(30, 5, 5),    (10, 0, 20),   (255, 60, 60)],
+    "Startups & VC":         [(5, 25, 15),   (5, 10, 35),   (0, 230, 130)],
+    "Big Tech":              [(5, 10, 35),   (15, 5, 45),   (10, 132, 255)],
+    "Gadgets & Hardware":    [(20, 10, 5),   (5, 15, 30),   (255, 170, 0)],
+    "Space & Science":       [(5, 5, 30),    (20, 5, 40),   (180, 100, 255)],
+    "Technology":            [(5, 12, 30),   (10, 8, 40),   (0, 198, 255)],
+}
+
+def _wrap_text(text: str, max_chars: int) -> list[str]:
+    """Wrap text into lines of at most max_chars characters."""
+    words  = text.split()
+    lines, cur = [], ""
+    for w in words:
+        if len(cur) + len(w) + 1 <= max_chars:
+            cur = (cur + " " + w).strip()
+        else:
+            if cur:
+                lines.append(cur)
+            cur = w
+    if cur:
+        lines.append(cur)
+    return lines[:4]   # max 4 lines on card
 
 
-def fetch_or_create_image(title: str, slug: str) -> str:
-    words   = title.split()
-    stop    = {"a", "an", "the", "and", "of", "to", "for", "in", "on", "with"}
-    keyword = next((w.lower() for w in words if w.lower() not in stop and len(w) > 3), "technology")
-    img_id  = image_id_for_keyword(keyword)
-    fname   = f"{slug}.jpg"
-    path    = os.path.join(OUTPUT_DIR, "images", fname)
-    if not os.path.exists(path):
-        for url in [f"https://picsum.photos/id/{img_id}/1200/630",
-                    "https://picsum.photos/id/0/1200/630"]:
+def _image_valid(path: str) -> bool:
+    """Return True only if path exists and is a real image (>5 KB)."""
+    return os.path.exists(path) and os.path.getsize(path) > 5120
+
+
+def _load_font(size: int):
+    """Load best available bold font at given size."""
+    from PIL import ImageFont
+    font_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+    ]
+    for fp in font_paths:
+        if os.path.exists(fp):
             try:
-                r = requests.get(url, timeout=10)
-                if r.status_code == 200:
-                    with open(path, "wb") as f:
-                        f.write(r.content)
-                    print(f"  ↓ image [{keyword}]")
-                    break
-            except Exception as e:
-                print(f"  ⚠ image error: {e}")
+                return ImageFont.truetype(fp, size)
+            except Exception:
+                pass
+    return ImageFont.load_default()
+
+
+def _overlay_text_on_image(img, title: str, category: str, accent: tuple):
+    """Draw category badge + title + branding onto a PIL Image in-place."""
+    from PIL import ImageDraw, ImageFont
+    W, H = img.size
+    draw = ImageDraw.Draw(img)
+
+    font_title = _load_font(50)
+    font_cat   = _load_font(20)
+    font_brand = _load_font(22)
+    font_small = _load_font(15)
+
+    # Dark gradient scrim over bottom 55% so text pops on any background
+    try:
+        from PIL import Image as _Img
+        scrim = _Img.new("RGBA", (W, H), (0, 0, 0, 0))
+        sd = ImageDraw.Draw(scrim)
+        scrim_top = int(H * 0.35)
+        for sy in range(scrim_top, H):
+            t = (sy - scrim_top) / (H - scrim_top)
+            a = int(t ** 0.7 * 215)
+            sd.line([(0, sy), (W, sy)], fill=(4, 10, 24, a))
+        img.paste(_Img.fromarray(
+            __import__("numpy", fromlist=["array"]).array(scrim)
+        ), mask=scrim.split()[3])
+    except Exception:
+        # Fallback: simple dark rectangle on lower half
+        draw.rectangle([(0, H//2), (W, H)], fill=(4, 10, 24))
+
+    # Category badge
+    cat_label = category.upper()
+    badge_x, badge_y = 40, 36
+    badge_w = len(cat_label) * 12 + 28
+    draw.rounded_rectangle(
+        [(badge_x, badge_y), (badge_x + badge_w, badge_y + 32)],
+        radius=5, fill=(accent[0], accent[1], accent[2])
+    )
+    draw.text((badge_x + 14, badge_y + 6), cat_label, font=font_cat, fill=(255, 255, 255))
+
+    # Title
+    lines  = _wrap_text(title, 38)[:3]
+    line_h = 60
+    total  = len(lines) * line_h
+    text_y = H - total - 72
+    for i, line in enumerate(lines):
+        y = text_y + i * line_h
+        draw.text((42 + 2, y + 2), line, font=font_title, fill=(0, 0, 0))
+        draw.text((42,     y),     line, font=font_title, fill=(255, 255, 255))
+
+    # Accent bar + branding
+    draw.rectangle([(0, H - 4), (W, H)], fill=(accent[0], accent[1], accent[2]))
+    draw.text((42, H - 36), "techbrief.voltixio.com", font=font_small, fill=(160, 200, 235))
+    brand = "TechBrief"
+    draw.text((W - 150, H - 40), brand, font=font_brand, fill=(accent[0], accent[1], accent[2]))
+
+
+def fetch_og_image_url(article_url: str) -> str:
+    """Scrape og:image meta tag from the original article URL (3-second timeout)."""
+    if not article_url or article_url == "#":
+        return ""
+    try:
+        import urllib.request, re as _re
+        req = urllib.request.Request(
+            article_url,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; TechBriefBot/1.0; +https://techbrief.voltixio.com)"}
+        )
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            chunk = resp.read(40000).decode("utf-8", errors="ignore")
+        m = (_re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\'](https?://[^"\'>\s]+)', chunk) or
+             _re.search(r'<meta[^>]+content=["\'](https?://[^"\'>\s]+)[^>]+property=["\']og:image["\']', chunk))
+        if m:
+            return m.group(1)
+    except Exception:
+        pass
+    return ""
+
+
+def build_article_image(article_url: str, rss_img_url: str, title: str, category: str, slug: str) -> str:
+    """
+    Best-effort article card image (1200×630 JPEG).
+    Priority: og:image from article → RSS enclosure/media → branded Pillow fallback.
+    Returns web-relative path /images/<slug>.jpg.
+    """
+    fname = f"{slug}.jpg"
+    path  = os.path.join(OUTPUT_DIR, "images", fname)
+
+    # Cache hit — only re-use if file is a real image (>5 KB)
+    if _image_valid(path):
+        return f"/images/{fname}"
+
+    # ── Try to get a real photo from the source article ───────────────────────
+    source_url = rss_img_url or fetch_og_image_url(article_url)
+
+    if source_url:
+        try:
+            import urllib.request, io
+            from PIL import Image
+            req = urllib.request.Request(
+                source_url,
+                headers={"User-Agent": "Mozilla/5.0 (compatible; TechBriefBot/1.0)"}
+            )
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                raw = resp.read()
+
+            src = Image.open(io.BytesIO(raw)).convert("RGB")
+            W, H = 1200, 630
+            # Centre-crop to 1200×630
+            sr = src.width / src.height
+            tr = W / H
+            if sr > tr:
+                nh = H; nw = int(H * sr)
+            else:
+                nw = W; nh = int(W / sr)
+            src = src.resize((nw, nh), Image.LANCZOS)
+            src = src.crop(((nw - W) // 2, (nh - H) // 2,
+                             (nw - W) // 2 + W, (nh - H) // 2 + H))
+
+            palette = CAT_PALETTES.get(category, CAT_PALETTES["Technology"])
+            _, _, accent = palette
+            src = src.convert("RGBA")
+            _overlay_text_on_image(src, title, category, accent)
+            src = src.convert("RGB")
+            src.save(path, "JPEG", quality=88, optimize=True)
+            print(f"  🖼  real photo [{category[:18]}] {title[:45]}")
+            return f"/images/{fname}"
+        except Exception as e:
+            print(f"  ⚠ photo fetch failed ({e}) — using designed fallback")
+
+    # ── Branded Pillow fallback (no external photo needed) ────────────────────
+    try:
+        from PIL import Image, ImageDraw
+        import math, random as _rand
+
+        W, H = 1200, 630
+        palette = CAT_PALETTES.get(category, CAT_PALETTES["Technology"])
+        c1, c2, accent = palette
+
+        img  = Image.new("RGB", (W, H), c1)
+        draw = ImageDraw.Draw(img)
+
+        # Diagonal gradient
+        for y in range(H):
+            t = y / H
+            r = int(c1[0] * (1 - t) + c2[0] * t)
+            g = int(c1[1] * (1 - t) + c2[1] * t)
+            b = int(c1[2] * (1 - t) + c2[2] * t)
+            draw.line([(0, y), (W, y)], fill=(r, g, b))
+
+        # Large glowing circle (top-right)
+        cx, cy = W - 160, -60
+        for radius in range(320, 40, -8):
+            fade = max(0, int(50 * (1 - radius / 320)))
+            col  = (
+                min(255, c1[0] + accent[0] // 3 + fade // 2),
+                min(255, c1[1] + accent[1] // 3 + fade // 2),
+                min(255, c1[2] + accent[2] // 3 + fade // 2),
+            )
+            draw.ellipse([(cx - radius, cy - radius), (cx + radius, cy + radius)], outline=col)
+
+        # Horizontal scan lines (tech feel)
+        for y in range(0, H, 18):
+            alpha = 12
+            draw.line([(0, y), (W, y)],
+                      fill=(min(255, c1[0] + alpha), min(255, c1[1] + alpha), min(255, c1[2] + alpha)))
+
+        # Category-specific large icon in the centre-right
+        CAT_ICONS = {
+            "AI & Machine Learning": "🤖",
+            "Cybersecurity": "🔐",
+            "Big Tech": "🏢",
+            "Startups & VC": "🚀",
+            "Technology": "📱",
+            "Space & Science": "🛸",
+        }
+        icon = CAT_ICONS.get(category, "⚡")
+
+        # Draw a large faint circle behind icon area
+        draw.ellipse([(W - 380, H // 2 - 200), (W - 20, H // 2 + 200)],
+                     fill=(min(255, c1[0] + 15), min(255, c1[1] + 15), min(255, c1[2] + 15)))
+
+        img = img.convert("RGBA")
+        _overlay_text_on_image(img, title, category, accent)
+        img = img.convert("RGB")
+        img.save(path, "JPEG", quality=90, optimize=True)
+        print(f"  🖼  designed [{category[:18]}] {title[:45]}")
+
+    except Exception as e:
+        print(f"  ⚠ image error '{title[:35]}': {e}")
+        # Last resort: solid colour block
+        try:
+            from PIL import Image as _I
+            palette = CAT_PALETTES.get(category, CAT_PALETTES["Technology"])
+            c1, _, _ = palette
+            _I.new("RGB", (1200, 630), c1).save(path, "JPEG", quality=60)
+        except Exception:
+            pass
+
     return f"/images/{fname}"
+
+
+def generate_branded_image(title: str, category: str, slug: str) -> str:
+    """Legacy wrapper — calls build_article_image with no source URL."""
+    return build_article_image("", "", title, category, slug)
+
+
+def _create_fallback_image(path: str, title: str, category: str, accent: tuple):
+    """Unused legacy stub — kept to avoid NameError in old call sites."""
+    try:
+        data = bytes([
+            0xff,0xd8,0xff,0xe0,0x00,0x10,0x4a,0x46,0x49,0x46,0x00,0x01,
+            0x01,0x00,0x00,0x01,0x00,0x01,0x00,0x00,0xff,0xdb,0x00,0x43,
+            0x00,0x08,0x06,0x06,0x07,0x06,0x05,0x08,0x07,0x07,0x07,0x09,
+            0x09,0x08,0x0a,0x0c,0x14,0x0d,0x0c,0x0b,0x0b,0x0c,0x19,0x12,
+            0x13,0x0f,0x14,0x1d,0x1a,0x1f,0x1e,0x1d,0x1a,0x1c,0x1c,0x20,
+            0x24,0x2e,0x27,0x20,0x22,0x2c,0x23,0x1c,0x1c,0x28,0x37,0x29,
+            0x2c,0x30,0x31,0x34,0x34,0x34,0x1f,0x27,0x39,0x3d,0x38,0x32,
+            0x3c,0x2e,0x33,0x34,0x32,0xff,0xc0,0x00,0x0b,0x08,0x00,0x01,
+            0x00,0x01,0x01,0x01,0x11,0x00,0xff,0xc4,0x00,0x1f,0x00,0x00,
+            0x01,0x05,0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,
+            0x00,0x00,0x00,0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
+            0x09,0x0a,0x0b,0xff,0xc4,0x00,0xb5,0x10,0x00,0x02,0x01,0x03,
+            0x03,0x02,0x04,0x03,0x05,0x05,0x04,0x04,0x00,0x00,0x01,0x7d,
+            0x01,0x02,0x03,0x00,0x04,0x11,0x05,0x12,0x21,0x31,0x41,0x06,
+            0x13,0x51,0x61,0x07,0x22,0x71,0x14,0x32,0x81,0x91,0xa1,0x08,
+            0x23,0x42,0xb1,0xc1,0x15,0x52,0xd1,0xf0,0x24,0x33,0x62,0x72,
+            0x82,0x09,0x0a,0x16,0x17,0x18,0x19,0x1a,0x25,0x26,0x27,0x28,
+            0x29,0x2a,0x34,0x35,0x36,0x37,0x38,0x39,0x3a,0x43,0x44,0x45,
+            0x46,0x47,0x48,0x49,0x4a,0x53,0x54,0x55,0x56,0x57,0x58,0x59,
+            0x5a,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x73,0x74,0x75,
+            0x76,0x77,0x78,0x79,0x7a,0x83,0x84,0x85,0x86,0x87,0x88,0x89,
+            0x8a,0x93,0x94,0x95,0x96,0x97,0x98,0x99,0x9a,0xa2,0xa3,0xa4,
+            0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xb2,0xb3,0xb4,0xb5,0xb6,0xb7,
+            0xb8,0xb9,0xba,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,
+            0xd2,0xd3,0xd4,0xd5,0xd6,0xd7,0xd8,0xd9,0xda,0xe1,0xe2,0xe3,
+            0xe4,0xe5,0xe6,0xe7,0xe8,0xe9,0xea,0xf1,0xf2,0xf3,0xf4,0xf5,
+            0xf6,0xf7,0xf8,0xf9,0xfa,0xff,0xda,0x00,0x08,0x01,0x01,0x00,
+            0x00,0x3f,0x00,0xfb,0xd3,0xff,0xd9
+        ])
+        with open(path, "wb") as f:
+            f.write(data)
+    except Exception:
+        pass
 
 
 def strip_html(text: str) -> str:
@@ -210,6 +478,32 @@ def rewrite_with_ollama(title: str, summary: str, cache: dict) -> str:
         return summary
 
 
+# ── RSS image extraction ──────────────────────────────────────────────────────
+
+def get_rss_image_url(entry) -> str:
+    """Extract the best image URL from an RSS/feedparser entry."""
+    # media:content
+    mc = getattr(entry, "media_content", None) or entry.get("media_content", [])
+    for m in mc:
+        url = m.get("url", "")
+        if url and any(url.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp")):
+            return url
+    # media:thumbnail
+    mt = getattr(entry, "media_thumbnail", None) or entry.get("media_thumbnail", [])
+    if mt:
+        return mt[0].get("url", "")
+    # enclosures
+    for enc in entry.get("enclosures", []):
+        t = enc.get("type", "")
+        if t.startswith("image/"):
+            return enc.get("href", enc.get("url", ""))
+    # links
+    for link in entry.get("links", []):
+        if link.get("type", "").startswith("image/"):
+            return link.get("href", "")
+    return ""
+
+
 # ── RSS parsing ───────────────────────────────────────────────────────────────
 
 def parse_rss(cache: dict) -> list[dict]:
@@ -236,7 +530,10 @@ def parse_rss(cache: dict) -> list[dict]:
         excerpt  = rewritten[:240] + "…" if len(rewritten) > 240 else rewritten
         slug     = slugify(title)
         uid      = stable_id(title)
-        category = detect_category(title, source_text)
+        category  = detect_category(title, source_text)
+        rss_img   = get_rss_image_url(entry)
+        art_link  = entry.get("link", "")
+        img_path  = build_article_image(art_link, rss_img, title, category, slug)
 
         articles.append({
             "title":        title,
@@ -247,6 +544,7 @@ def parse_rss(cache: dict) -> list[dict]:
             "full_content": rewritten,
             "excerpt":      excerpt,
             "slug":         slug,
+            "image":        img_path,
             "uid":          uid,
             "detail_url":   f"/article/{uid}-{slug}.html",
             "category":     category,
@@ -351,28 +649,20 @@ nav a:hover { color:var(--blue2); }
 
 /* ── Hero Banner ── */
 .hero-banner {
-  position:relative; width:100%; overflow:hidden;
-  max-height:380px; display:block;
+  width:100%; background:#060c1a;
+  display:flex; justify-content:center; align-items:center;
+  padding:18px 0 0; line-height:0;
+}
+.hero-banner-inner {
+  width:75%; max-width:1080px; position:relative;
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 0 40px rgba(0,198,255,.12),0 0 80px rgba(10,132,255,.08);
 }
 .hero-banner img {
-  width:100%; height:380px; object-fit:cover; object-position:center;
-  display:block;
+  width:100%; height:auto; display:block;
 }
-.hero-banner-gradient {
-  position:absolute; inset:0;
-  background:linear-gradient(
-    to right,
-    rgba(6,12,26,.45) 0%,
-    transparent 40%,
-    transparent 60%,
-    rgba(6,12,26,.45) 100%
-  );
-  pointer-events:none;
-}
-.hero-banner-bottom {
-  position:absolute; bottom:0; left:0; right:0; height:60px;
-  background:linear-gradient(to top,var(--navy) 0%,transparent 100%);
-}
+.hero-banner-gradient { display:none; }
+.hero-banner-bottom   { display:none; }
 
 /* ── Category Icons Row ── */
 .cat-icons-row {
@@ -521,23 +811,16 @@ nav a:hover { color:var(--blue2); }
 }
 .back-btn:hover { background:rgba(0,198,255,.08); border-color:var(--blue2); }
 
-/* ── Search page ── */
-#search-input {
-  width:100%; padding:15px 20px; font-size:1rem;
-  background:var(--navy2); border:1px solid rgba(0,198,255,.25);
-  color:var(--silver2); border-radius:12px; margin:24px 0 20px; outline:none;
-  transition:border .2s;
-}
-#search-input:focus { border-color:var(--blue2); box-shadow:0 0 0 3px rgba(0,198,255,.1); }
-.search-result-item {
-  background:var(--navy2); padding:22px; border-radius:12px; margin-bottom:16px;
-  border:1px solid rgba(0,198,255,.1); transition:border-color .2s;
-}
-.search-result-item:hover { border-color:rgba(0,198,255,.3); }
-.search-result-item h3 a { color:var(--white); font-size:1.02rem; font-weight:600; }
-.search-result-item h3 a:hover { color:var(--blue2); }
-.search-result-item p { color:var(--silver); font-size:.88rem; margin-top:6px; }
-.no-results { text-align:center; color:var(--silver); padding:60px; }
+/* ── Redirect / countdown box ── */
+.redirect-box{background:var(--navy2);border:1px solid rgba(0,198,255,.2);border-radius:14px;padding:36px 28px;text-align:center;margin:36px 0;}
+.redirect-icon{font-size:2.4rem;margin-bottom:14px;}
+.redirect-box p{color:var(--silver);font-size:.95rem;margin-bottom:20px;line-height:1.7;}
+.redirect-box p strong{color:var(--white);}
+.btn-skip{display:inline-block;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:.92rem;font-weight:700;padding:13px 30px;border-radius:10px;text-decoration:none;letter-spacing:.02em;margin-bottom:20px;transition:opacity .2s;}
+.btn-skip:hover{opacity:.85;}
+.redirect-progress{background:rgba(255,255,255,.07);border-radius:4px;height:5px;margin-top:16px;overflow:hidden;}
+.redirect-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue2));width:0%;transition:width 1s linear;border-radius:4px;}
+.article-clock{text-align:right;padding:10px 0 6px;font-size:.8rem;color:var(--silver);letter-spacing:.04em;}
 
 /* ── Footer ── */
 footer {
@@ -598,9 +881,15 @@ footer {
 """
 
 def ga4_snippet() -> str:
-    return f"""<!-- Google Analytics -->
+    return f"""<!-- Favicon -->
+<link rel="icon" type="image/png" href="/images/favicon.png">
+<link rel="apple-touch-icon" href="/images/favicon.png">
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('js',new Date());gtag('config','{GA4_ID}');</script>"""
+<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('js',new Date());gtag('config','{GA4_ID}');</script>
+<!-- Google Subscribe with Google (SwG) -->
+<script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+<script>(self.SWG_BASIC=self.SWG_BASIC||[]).push(b=>{{b.init({{type:"NewsArticle",isPartOfType:["Product"],isPartOfProductId:"CAowmtTgCw:openaccess",clientOptions:{{theme:"light",lang:"en"}}}});}});</script>"""
 
 
 def adsense_banner() -> str:
@@ -654,14 +943,13 @@ HEADER_TMPL = """
       </a>
       <nav>
         <a href="/">Home</a>
-        <a href="/search.html">Search</a>
         {% for cat in categories %}<a href="/category/{{ cat|lower|replace(' & ','-')|replace(' ','-') }}.html">{{ cat.split(' &')[0] }}</a>{% endfor %}
         <a href="/about.html">About</a>
         <a href="/contact.html">Contact</a>
       </nav>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <span class="live-dot">Live</span>
-        <form class="search-bar" action="/search.html" method="get">
+        <form class="search-bar" onsubmit="var q=this.querySelector('input').value.trim();if(q)window.location.href='/?q='+encodeURIComponent(q);return false;">
           <input type="text" name="q" placeholder="Search news…">
           <button type="submit">Search</button>
         </form>
@@ -677,7 +965,7 @@ FOOTER_TMPL = """
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="logo-text">Tech<span>Brief</span></div>
-        <p>AI-rewritten tech news updated every hour. Unique full-length articles powered by a local LLM — original insights on the stories that matter.</p>
+        <p>Original tech news updated every hour. Full-length articles powered by a local LLM — unique insights on the stories that matter.</p>
         <div style="display:flex;gap:14px;margin-top:18px;">
           <a href="/feed.xml" style="color:var(--blue2);font-size:.82rem;font-weight:600;border:1px solid rgba(0,198,255,.3);padding:6px 14px;border-radius:8px;">RSS Feed</a>
           <a href="/contact.html" style="color:var(--blue2);font-size:.82rem;font-weight:600;border:1px solid rgba(0,198,255,.3);padding:6px 14px;border-radius:8px;">Subscribe</a>
@@ -690,13 +978,12 @@ FOOTER_TMPL = """
         <a href="/category/cybersecurity.html">Cybersecurity</a>
         <a href="/category/startups-vc.html">Startups &amp; VC</a>
         <a href="/category/big-tech.html">Big Tech</a>
-        <a href="/category/gadgets-hardware.html">Gadgets</a>
+        <a href="/category/technology.html">Gadgets</a>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
         <a href="/about.html">About TechBrief</a>
         <a href="/contact.html">Contact Us</a>
-        <a href="/search.html">Search</a>
         <a href="/feed.xml">RSS Feed</a>
         <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy Policy</a>
         <a href="https://learnai.voltixio.com/tos" target="_blank">Terms of Service</a>
@@ -712,7 +999,7 @@ FOOTER_TMPL = """
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; {{ year }} {{ site_title }} · A Voltixio Publication · AI-rewritten summaries. Sources linked.</span>
+      <span>&copy; {{ year }} {{ site_title }} · A Voltixio Publication · Original coverage. Sources linked.</span>
       <div>
         <a href="https://learnai.voltixio.com/privacy" target="_blank">Privacy</a>
         <a href="https://learnai.voltixio.com/tos" target="_blank">Terms</a>
@@ -749,9 +1036,9 @@ def render_homepage(articles: list[dict], categories: list[str]):
   <meta property="og:description" content="{{ site_description }}">
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="{{ site_url }}">
-  <meta property="og:image"       content="{{ site_url }}/images/hero-banner.jpg">
+  <meta property="og:image"       content="{{ site_url }}/images/hero-banner.png">
   <meta name="twitter:card"       content="summary_large_image">
-  <meta name="twitter:image"      content="{{ site_url }}/images/hero-banner.jpg">
+  <meta name="twitter:image"      content="{{ site_url }}/images/hero-banner.png">
   <link rel="canonical"           href="{{ site_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site_title }}" href="{{ site_url }}/feed.xml">
   """ + head_extras + "\n  " + jsonld + """
@@ -762,12 +1049,35 @@ def render_homepage(articles: list[dict], categories: list[str]):
 
 <!-- ── Hero Banner ───────────────────────────────── -->
 <div class="hero-banner">
-  <img src="/images/hero-banner.jpg"
-       alt="Trending Technology News – Real Time, Real News"
-       onerror="this.style.display='none'">
-  <div class="hero-banner-gradient"></div>
-  <div class="hero-banner-bottom"></div>
+  <div class="hero-banner-inner">
+    <img src="/images/hero-banner.png"
+         alt="Trending Technology News – Real Time, Real News"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div style="display:none;width:100%;height:120px;background:linear-gradient(135deg,#0a1a3a,#060c1a);align-items:center;justify-content:center;">
+      <span style="color:rgba(0,198,255,.4);font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;">⚡ TechBrief — Real Time. Real News.</span>
+    </div>
+  </div>
 </div>
+
+<!-- ── Live Clock Bar ─────────────────────────────── -->
+<div style="background:var(--navy2);border-bottom:1px solid rgba(0,198,255,.1);padding:8px 0;">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="color:rgba(255,68,68,.9);font-size:.65rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.3);padding:3px 10px;border-radius:20px;">⚡ LIVE</span>
+      <span style="color:var(--silver);font-size:.78rem;">Breaking tech news · Updated every hour</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;font-family:'Courier New',monospace;background:rgba(0,198,255,.06);border:1px solid rgba(0,198,255,.2);padding:5px 14px;border-radius:8px;">
+      <span style="font-size:1.55rem;font-weight:900;color:var(--blue2);text-shadow:0 0 16px rgba(0,198,255,.8),0 0 4px rgba(0,198,255,.5);letter-spacing:.04em;" id="clock-h">--</span>
+      <span style="font-size:1.55rem;font-weight:900;color:rgba(0,198,255,.6);animation:colonBlink .9s step-end infinite;line-height:1;">:</span>
+      <span style="font-size:1.55rem;font-weight:900;color:var(--blue2);text-shadow:0 0 16px rgba(0,198,255,.8),0 0 4px rgba(0,198,255,.5);letter-spacing:.04em;" id="clock-m">--</span>
+      <span style="font-size:1.55rem;font-weight:900;color:rgba(0,198,255,.6);animation:colonBlink .9s step-end infinite;line-height:1;">:</span>
+      <span style="font-size:1rem;font-weight:800;color:rgba(0,198,255,.7);align-self:flex-end;padding-bottom:2px;" id="clock-s">--</span>
+      <span style="font-size:.85rem;font-weight:800;color:var(--blue2);margin-left:2px;align-self:flex-end;padding-bottom:3px;" id="clock-ampm"></span>
+      <span style="font-size:.75rem;color:var(--silver);margin-left:10px;align-self:center;" id="clock-date"></span>
+    </div>
+  </div>
+</div>
+<style>@keyframes colonBlink{0%,100%{opacity:1;}50%{opacity:.15;}}</style>
 
 <!-- ── Category Icons Row ─────────────────────────── -->
 <div class="cat-icons-row">
@@ -779,7 +1089,7 @@ def render_homepage(articles: list[dict], categories: list[str]):
       <a href="/category/cybersecurity.html" class="cat-icon-item" style="text-decoration:none;">
         <div class="icon-circle">🔐</div><span>Cybersecurity</span>
       </a>
-      <a href="/category/gadgets-hardware.html" class="cat-icon-item" style="text-decoration:none;">
+      <a href="/category/technology.html" class="cat-icon-item" style="text-decoration:none;">
         <div class="icon-circle">📱</div><span>Gadgets &amp; Reviews</span>
       </a>
       <a href="/category/big-tech.html" class="cat-icon-item" style="text-decoration:none;">
@@ -788,7 +1098,7 @@ def render_homepage(articles: list[dict], categories: list[str]):
       <a href="/category/startups-vc.html" class="cat-icon-item" style="text-decoration:none;">
         <div class="icon-circle">🚀</div><span>Startups &amp; VC</span>
       </a>
-      <a href="/category/space-science.html" class="cat-icon-item" style="text-decoration:none;">
+      <a href="/category/technology.html" class="cat-icon-item" style="text-decoration:none;">
         <div class="icon-circle">☁️</div><span>Cloud &amp; Future Tech</span>
       </a>
     </div>
@@ -836,13 +1146,28 @@ def render_homepage(articles: list[dict], categories: list[str]):
   <div class="subscribe-cta">
     <div class="subscribe-cta-text">
       <h3>🔔 Subscribe &amp; Stay Ahead of the Future</h3>
-      <p>Get AI-rewritten tech news delivered to your inbox — the stories that matter, in your language.</p>
+      <p>Get the latest tech news delivered to your inbox — the stories that matter, in your language.</p>
     </div>
     <a href="/contact.html" class="cta-btn">Subscribe Now →</a>
   </div>
 
 </div>
 """ + FOOTER_TMPL + """
+<script>
+(function tick(){
+  var n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
+  var ap=h>=12?'PM':'AM';h=h%12||12;
+  var p=function(x){return String(x).padStart(2,'0');};
+  var el=function(id){return document.getElementById(id);};
+  if(el('clock-h'))el('clock-h').textContent=p(h);
+  if(el('clock-m'))el('clock-m').textContent=p(m);
+  if(el('clock-s'))el('clock-s').textContent=p(s);
+  if(el('clock-ampm'))el('clock-ampm').textContent=ap;
+  var D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(el('clock-date'))el('clock-date').textContent=D[n.getDay()]+' '+M[n.getMonth()]+' '+n.getDate()+', '+n.getFullYear();
+  setTimeout(tick,1000);
+})();
+</script>
 </body>
 </html>"""
     t    = Template(tmpl_str)
@@ -889,13 +1214,14 @@ def render_article_pages(articles: list[dict], categories: list[str]):
 </head>
 <body class="article-page">
 """ + HEADER_TMPL + """
-<div class="container">
+<div class="container" style="max-width:820px;padding-top:36px;padding-bottom:80px;">
 
   <a href="/" class="back-btn">← Back to home</a>
 
   <!-- Hero image with title + category overlaid -->
   <div class="article-hero">
-    <img src="{{ a.image }}" alt="{{ a.title }}">
+    <img src="{{ a.image }}" alt="{{ a.title }}"
+         onerror="this.style.display='none'">
     <div class="article-hero-overlay">
       <span class="article-hero-cat">{{ a.category }}</span>
       <h1 class="article-hero-title">{{ a.title }}</h1>
@@ -903,21 +1229,60 @@ def render_article_pages(articles: list[dict], categories: list[str]):
     </div>
   </div>
 
-  <!-- Full rewritten article body -->
+  <!-- Live clock -->
+  <div class="article-clock">
+    <span id="clock-h">--</span>:<span id="clock-m">--</span>:<span id="clock-s">--</span>&nbsp;<span id="clock-ampm"></span>&ensp;·&ensp;<span id="clock-date"></span>
+  </div>
+
+  <!-- AI Brief (first 3 paragraphs) -->
   <div class="article-body">
-    {% for para in paragraphs %}
+    {% for para in paragraphs[:3] %}
     <p>{{ para }}</p>
-    {% if loop.index == 2 %}""" + ad_in_article + """{% endif %}
     {% endfor %}
-    <div class="source-link">
-      <a href="{{ a.link }}" target="_blank" rel="noopener noreferrer">
-        Read original source →
-      </a>
+  </div>
+
+  <!-- Countdown redirect box -->
+  <div class="redirect-box">
+    <div class="redirect-icon">📰</div>
+    <p>You're being redirected to the full original story in <strong><span id="countdown">10</span> seconds</strong>.</p>
+    <a href="{{ a.link }}" id="skip-btn" class="btn-skip" target="_blank" rel="noopener noreferrer">
+      Skip — Read Original Now →
+    </a>
+    <div class="redirect-progress">
+      <div class="redirect-progress-bar" id="progress-bar"></div>
     </div>
   </div>
 
 </div>
 """ + FOOTER_TMPL + """
+<script>
+// Live clock
+(function tick(){
+  var n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
+  var ap=h>=12?'PM':'AM';h=h%12||12;
+  var p=function(x){return String(x).padStart(2,'0');};
+  document.getElementById('clock-h').textContent=p(h);
+  document.getElementById('clock-m').textContent=p(m);
+  document.getElementById('clock-s').textContent=p(s);
+  document.getElementById('clock-ampm').textContent=ap;
+  var D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('clock-date').textContent=D[n.getDay()]+' '+M[n.getMonth()]+' '+n.getDate()+', '+n.getFullYear();
+  setTimeout(tick,1000);
+})();
+// Countdown redirect
+(function(){
+  var left=10, target={{ a.link | tojson }};
+  var bar=document.getElementById('progress-bar');
+  var num=document.getElementById('countdown');
+  var iv=setInterval(function(){
+    left--;
+    num.textContent=left;
+    bar.style.width=((10-left)/10*100)+'%';
+    if(left<=0){clearInterval(iv);window.location.href=target;}
+  },1000);
+  document.getElementById('skip-btn').addEventListener('click',function(){clearInterval(iv);});
+})();
+</script>
 </body>
 </html>"""
     t = Template(tmpl_str)
@@ -930,7 +1295,7 @@ def render_article_pages(articles: list[dict], categories: list[str]):
 
         html = t.render(site_title=SITE_TITLE, site_url=SITE_URL,
                         a=a, paragraphs=paragraphs, categories=categories,
-                        year=datetime.now().year)
+                        articles=articles, year=datetime.now().year)
         fname = os.path.join(OUTPUT_DIR, "article", f"{a['uid']}-{a['slug']}.html")
         with open(fname, "w", encoding="utf-8") as f:
             f.write(html)
@@ -943,7 +1308,7 @@ def render_category_pages(articles: list[dict], categories: list[str]):
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{ cat }} – {{ site_title }}</title>
-  <meta name="description" content="{{ cat }} tech news, AI-rewritten hourly.">
+  <meta name="description" content="{{ cat }} tech news, updated hourly.">
   <link rel="canonical" href="{{ site_url }}/category/{{ cat_slug }}.html">
   <style>""" + SHARED_CSS + """</style>
 </head>
@@ -955,7 +1320,7 @@ def render_category_pages(articles: list[dict], categories: list[str]):
       <span class="logo-text">Tech<span style="color:var(--blue2);">Brief</span></span>
     </a>
     <nav>
-      <a href="/">Home</a><a href="/search.html">Search</a>
+      <a href="/">Home</a>
       {% for c in categories %}<a href="/category/{{ c|lower|replace(' & ','-')|replace(' ','-') }}.html"
         {% if c == cat %}style="color:var(--blue2);"{% endif %}>{{ c.split(' &')[0] }}</a>{% endfor %}
       <a href="/about.html">About</a>
@@ -966,7 +1331,7 @@ def render_category_pages(articles: list[dict], categories: list[str]):
 <div class="page-hero">
   <div class="container">
     <h1>{{ cat }}</h1>
-    <p>AI-rewritten {{ cat }} news — updated every hour</p>
+    <p>Original {{ cat }} news — updated every hour</p>
   </div>
 </div>
 <div class="container">
@@ -1046,7 +1411,7 @@ def render_search_page(categories: list[str]):
 <div class="page-hero">
   <div class="container">
     <h1>Search Articles</h1>
-    <p>Search across all AI-rewritten tech articles — updated every hour</p>
+    <p>Search across all tech articles — updated every hour</p>
   </div>
 </div>
 <div class="container" style="max-width:860px;padding-top:0;">
@@ -1123,7 +1488,7 @@ def render_sitemap(articles: list[dict]):
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
              f'  <url><loc>{SITE_URL}/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>',
-             f'  <url><loc>{SITE_URL}/search.html</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>']
+             f'  <url><loc>{SITE_URL}/about.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>']
     for a in articles:
         lines.append(f'  <url><loc>{SITE_URL}{a["detail_url"]}</loc><lastmod>{today}</lastmod>'
                      f'<changefreq>monthly</changefreq><priority>0.7</priority></url>')
@@ -1200,39 +1565,131 @@ def render_static_pages():
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>About – {SITE_TITLE}</title>
+  <title>About – {SITE_TITLE} | AI-Powered Tech News</title>
+  <meta name="description" content="Tech Brief is an AI-powered technology news platform built by Voltixio. Original, plagiarism-free tech journalism updated every hour.">
+  <link rel="canonical" href="{SITE_URL}/about.html">
   {ga4_snippet()}
-  <style>{SHARED_CSS}</style>
+  <style>{SHARED_CSS}
+.about-hero{{background:var(--navy2);border-bottom:1px solid rgba(0,198,255,.15);padding:64px 0 52px;position:relative;overflow:hidden;text-align:center;}}
+.about-hero::before{{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:700px;height:400px;background:radial-gradient(ellipse,rgba(10,132,255,.1) 0%,transparent 65%);pointer-events:none;}}
+.about-hero-grid{{position:absolute;inset:0;background:linear-gradient(rgba(10,132,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(10,132,255,.03) 1px,transparent 1px);background-size:40px 40px;}}
+.about-badge{{display:inline-block;background:rgba(10,132,255,.15);border:1px solid rgba(0,198,255,.25);color:var(--blue2);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;padding:5px 18px;border-radius:20px;margin-bottom:20px;}}
+.about-hero h1{{font-size:2.6rem;font-weight:800;color:var(--white);line-height:1.15;margin-bottom:14px;}}
+.about-hero h1 span{{color:var(--blue2);}}
+.about-hero p{{color:var(--silver);font-size:1rem;max-width:580px;margin:0 auto;}}
+.stats-row{{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:40px 0;}}
+.stat-box{{background:var(--navy2);border:1px solid rgba(0,198,255,.12);border-radius:12px;padding:24px;text-align:center;}}
+.stat-box .num{{font-size:2rem;font-weight:800;color:var(--blue2);display:block;}}
+.stat-box .lbl{{font-size:.72rem;color:var(--silver);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;display:block;}}
+.about-grid{{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin:40px 0;}}
+.pipeline-row{{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin:32px 0;}}
+.pipe-step{{background:var(--navy2);border:1px solid rgba(0,198,255,.12);border-radius:12px;padding:22px 18px;text-align:center;position:relative;}}
+.pipe-step .icon{{font-size:1.8rem;margin-bottom:10px;display:block;}}
+.pipe-step h3{{font-size:.9rem;font-weight:700;color:var(--white);margin-bottom:6px;}}
+.pipe-step p{{font-size:.8rem;color:var(--silver);line-height:1.55;}}
+.pipe-num{{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;width:22px;height:22px;border-radius:50%;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;}}
+.values-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:32px 0;}}
+.val-card{{background:var(--navy2);border:1px solid rgba(0,198,255,.1);border-radius:12px;padding:24px 20px;}}
+.val-card .icon{{font-size:1.4rem;margin-bottom:10px;}}
+.val-card h3{{font-size:.9rem;font-weight:700;color:var(--white);margin-bottom:7px;}}
+.val-card p{{font-size:.82rem;color:var(--silver);line-height:1.7;}}
+.built-by-box{{background:var(--navy2);border:1px solid rgba(0,198,255,.15);border-radius:14px;padding:36px;display:flex;align-items:center;gap:32px;margin:32px 0;}}
+.v-logo{{width:72px;height:72px;background:linear-gradient(135deg,#0a2045,#0d1a35);border:1.5px solid rgba(0,198,255,.25);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.6rem;font-weight:900;color:var(--blue2);}}
+.built-by-box h2{{font-size:1.3rem;font-weight:800;color:var(--white);margin-bottom:8px;}}
+.built-by-box h2 span{{color:var(--blue2);}}
+.built-by-box p{{color:var(--silver);font-size:.88rem;line-height:1.75;margin-bottom:14px;}}
+.link-pills{{display:flex;gap:10px;flex-wrap:wrap;}}
+.link-pill{{display:inline-flex;align-items:center;gap:5px;background:rgba(10,132,255,.12);border:1px solid rgba(0,198,255,.22);color:var(--blue2);font-size:.78rem;font-weight:700;padding:6px 14px;border-radius:8px;text-decoration:none;transition:background .2s;}}
+.link-pill:hover{{background:rgba(10,132,255,.22);}}
+.about-cta{{background:linear-gradient(135deg,var(--navy2),var(--navy3));border:1px solid rgba(0,198,255,.15);border-radius:14px;padding:44px;text-align:center;margin:32px 0;position:relative;overflow:hidden;}}
+.about-cta::before{{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:280px;background:radial-gradient(ellipse,rgba(10,132,255,.09) 0%,transparent 70%);pointer-events:none;}}
+.about-cta h2{{font-size:1.7rem;font-weight:800;color:var(--white);margin-bottom:10px;}}
+.about-cta p{{color:var(--silver);font-size:.92rem;margin-bottom:24px;max-width:460px;margin-left:auto;margin-right:auto;}}
+.cta-row{{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}}
+.btn-p{{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:.88rem;font-weight:700;padding:12px 26px;border-radius:9px;border:none;cursor:pointer;text-decoration:none;display:inline-block;}}
+.btn-g{{background:transparent;color:var(--blue2);font-size:.88rem;font-weight:700;padding:12px 26px;border-radius:9px;border:1px solid rgba(0,198,255,.3);text-decoration:none;display:inline-block;}}
+@media(max-width:900px){{.stats-row{{grid-template-columns:1fr 1fr;}}.about-grid{{grid-template-columns:1fr;}}.pipeline-row{{grid-template-columns:1fr 1fr;}}.values-grid{{grid-template-columns:1fr 1fr;}}.built-by-box{{flex-direction:column;text-align:center;}}}}
+@media(max-width:600px){{.pipeline-row{{grid-template-columns:1fr;}}.values-grid{{grid-template-columns:1fr;}}.stats-row{{grid-template-columns:1fr 1fr;}}}}
+  </style>
 </head>
 <body>
 {nav_mini}
-<div class="page-hero">
-  <div class="container">
-    <h1>About {SITE_TITLE}</h1>
-    <p>AI-rewritten tech news from Baltimore, MD · A Voltixio Publication</p>
+
+<div class="about-hero">
+  <div class="about-hero-grid"></div>
+  <div class="container" style="position:relative;">
+    <div class="about-badge">About Tech Brief</div>
+    <h1>AI-Powered News,<br><span>Built for the Future</span></h1>
+    <p>Every hour, our pipeline rewrites the tech world's most important stories — original, fast, and free from plagiarism.</p>
   </div>
 </div>
-<div class="container" style="max-width:860px;">
-  <div class="content-box">
-    <p><strong style="color:var(--white);">{SITE_TITLE}</strong> automatically aggregates the latest technology
-      news from leading sources around the web — including TechCrunch, Ars Technica, VentureBeat, The Hacker News,
-      OpenAI, Anthropic, and more — then uses a local large language model (Ollama with gemma2:9b) to rewrite each
-      article into a unique, engaging, full-length ~500-word piece. Updated every hour. Plagiarism-free.</p>
-    <h3>What We Cover</h3>
-    <p>AI &amp; Machine Learning · Cybersecurity · Startups &amp; VC · Big Tech · Gadgets &amp; Hardware · Space &amp; Science</p>
-    <h3>Our Technology</h3>
-    <p>Every article is re-crafted by a locally-hosted LLM — no data leaves our server, no third-party AI APIs.
-      Original sources are always linked at the bottom of each article. Unique stock photography is auto-generated
-      per article using a deterministic image pipeline.</p>
-    <h3>Part of Voltixio</h3>
-    <p>TechBrief is a publication by <a href="https://voltixio.com" target="_blank">Voltixio</a>, a digital
-      media &amp; AI company based in Baltimore, MD. We build automated content platforms that deliver real value
-      to real readers.</p>
-    <p style="margin-top:20px;">
-      <a href="/feed.xml" style="margin-right:16px;">📡 Subscribe via RSS →</a>
-      <a href="/contact.html">✉️ Contact us →</a>
-    </p>
+
+<div class="container" style="max-width:1100px;padding-top:48px;padding-bottom:80px;">
+
+  <div class="stats-row">
+    <div class="stat-box"><span class="num">40+</span><span class="lbl">Source feeds</span></div>
+    <div class="stat-box"><span class="num">24/7</span><span class="lbl">Live updates</span></div>
+    <div class="stat-box"><span class="num">100%</span><span class="lbl">Original</span></div>
+    <div class="stat-box"><span class="num">0</span><span class="lbl">Plagiarism</span></div>
   </div>
+
+  <div class="section-header"><h2>Our Mission</h2></div>
+  <div class="about-grid">
+    <div class="content-box" style="margin:0;">
+      <p style="margin-bottom:14px;">Tech Brief was built on a simple belief: technology news should be fast, original, and accessible to everyone. We pull from 40+ premium RSS sources, rewrite every article using a locally-hosted large language model, and publish the result — every single hour, around the clock.</p>
+      <p style="margin-bottom:14px;">No paywalls. No copy-paste journalism. No tracking pixels selling your data. Just clean, original coverage of the stories shaping the world of technology.</p>
+      <p>We cover the six verticals that matter most: <strong style="color:var(--blue2);">AI &amp; Machine Learning, Cybersecurity, Startups &amp; VC, Big Tech, Gadgets &amp; Hardware,</strong> and <strong style="color:var(--blue2);">Space &amp; Science.</strong></p>
+    </div>
+    <div class="content-box" style="margin:0;">
+      <h3 style="margin-top:0;color:var(--blue2);">Our Technology Stack</h3>
+      <p style="margin-bottom:12px;"><strong style="color:var(--white);">RSS Aggregation</strong> — UglyFeed pipeline pulls from 40+ curated tech sources every hour.</p>
+      <p style="margin-bottom:12px;"><strong style="color:var(--white);">AI Rewriting</strong> — Ollama running Gemma2 9B locally rewrites every article into ~500 original words.</p>
+      <p style="margin-bottom:12px;"><strong style="color:var(--white);">Image Generation</strong> — Pillow creates branded article card images per story, styled by category.</p>
+      <p><strong style="color:var(--white);">Static Deploy</strong> — Python/Jinja2 builds the full site and nginx serves it via SSL on Certbot.</p>
+    </div>
+  </div>
+
+  <div class="section-header"><h2>How It Works</h2></div>
+  <div class="pipeline-row">
+    <div class="pipe-step"><div class="pipe-num">1</div><span class="icon">📡</span><h3>Aggregate</h3><p>RSS feeds from 40+ trusted tech publications pulled every hour.</p></div>
+    <div class="pipe-step"><div class="pipe-num">2</div><span class="icon">🤖</span><h3>Rewrite</h3><p>Local Ollama LLM (Gemma 9B) produces a fully original 500-word piece.</p></div>
+    <div class="pipe-step"><div class="pipe-num">3</div><span class="icon">🎨</span><h3>Generate</h3><p>Branded article images created per story via Pillow — no external APIs.</p></div>
+    <div class="pipe-step"><div class="pipe-num">4</div><span class="icon">🚀</span><h3>Publish</h3><p>Site rebuilds automatically. Articles syndicated to social channels.</p></div>
+  </div>
+
+  <div class="section-header"><h2>What We Stand For</h2></div>
+  <div class="values-grid">
+    <div class="val-card"><div class="icon">⚡</div><h3>Speed Without Compromise</h3><p>Our pipeline rebuilds every hour so you're never reading yesterday's news.</p></div>
+    <div class="val-card"><div class="icon">🔒</div><h3>Privacy First</h3><p>No third-party ad networks, no data brokers, no cookies beyond essential analytics.</p></div>
+    <div class="val-card"><div class="icon">✍️</div><h3>Original Content</h3><p>Every article rewritten from scratch. We don't republish — we create.</p></div>
+    <div class="val-card"><div class="icon">🌐</div><h3>Free &amp; Open</h3><p>No paywalls, no subscriptions. Quality tech journalism free for everyone.</p></div>
+    <div class="val-card"><div class="icon">🎯</div><h3>Focused Coverage</h3><p>Six verticals only — AI, Cyber, Startups, Big Tech, Gadgets, Space. Depth over breadth.</p></div>
+    <div class="val-card"><div class="icon">📊</div><h3>Transparent Sources</h3><p>Every article links back to the original publication. Always.</p></div>
+  </div>
+
+  <div class="built-by-box">
+    <div class="v-logo">V</div>
+    <div>
+      <h2>Built by <span>Voltixio</span></h2>
+      <p>Tech Brief is a product of Voltixio — a Baltimore-based technology company building AI-powered tools and platforms. Voltixio develops automation pipelines, intelligent agents, and consumer products at the intersection of artificial intelligence and real-world utility.</p>
+      <div class="link-pills">
+        <a href="https://voltixio.com" target="_blank" class="link-pill">↗ voltixio.com</a>
+        <a href="mailto:techbrief@voltixio.com" class="link-pill">✉ techbrief@voltixio.com</a>
+        <a href="/feed.xml" class="link-pill">⛁ RSS Feed</a>
+        <a href="/contact.html" class="link-pill">✦ Contact</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-cta">
+    <h2>Stay Ahead of the Curve</h2>
+    <p>Get the top 5 tech stories delivered to your inbox every morning. Free, forever.</p>
+    <div class="cta-row">
+      <a href="/contact.html" class="btn-p">Subscribe Free →</a>
+      <a href="/" class="btn-g">Read Latest News</a>
+    </div>
+  </div>
+
 </div>
 {footer_mini}
 </body></html>"""
@@ -1330,7 +1787,12 @@ def main():
 
     print(f"\nAttaching images…")
     for a in articles:
-        a["image"] = fetch_or_create_image(a["title"], a["uid"] + "-" + a["slug"][:20])
+        # Only regenerate if image not already set by parse_rss or file missing
+        existing = a.get("image", "")
+        existing_path = os.path.join(OUTPUT_DIR, existing.lstrip("/")) if existing else ""
+        if existing and os.path.exists(existing_path):
+            continue  # already generated with RSS source image
+        a["image"] = generate_branded_image(a["title"], a.get("category", "tech"), a["uid"] + "-" + a["slug"][:20])
 
     categories = sorted(set(a["category"] for a in articles))
     print(f"\nBuilding {len(articles)} pages across {len(categories)} categories…")
@@ -1338,8 +1800,8 @@ def main():
     render_homepage(articles, categories)
     render_article_pages(articles, categories)
     render_category_pages(articles, categories)
-    render_search_page(categories)
-    render_search_index(articles)
+    # search page removed — search is inline on homepage
+    render_search_index(articles)  # keep search.json for future use
     render_sitemap(articles)
     render_rss_feed(articles)
     render_robots_txt()

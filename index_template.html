@@ -19,7 +19,19 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DHCN454V9J"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-DHCN454V9J');</script>
 <!-- Schema.org -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Tech Brief","url":"https://techbrief.voltixio.com","logo":"https://techbrief.voltixio.com/images/logo.png","contactPoint":{"@type":"ContactPoint","email":"voltixio_editor@voltixio.com","contactType":"editorial"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Tech Brief","url":"https://techbrief.voltixio.com","logo":"https://techbrief.voltixio.com/images/logo.png","contactPoint":{"@type":"ContactPoint","email":"techbrief@voltixio.com","contactType":"editorial"}}</script>
+<!-- Google Subscribe with Google (SwG) — enables Follow button in Google News / Discover -->
+<script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+<script>
+  (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
+    basicSubscriptions.init({
+      type: "NewsArticle",
+      isPartOfType: ["Product"],
+      isPartOfProductId: "CAowmtTgCw:openaccess",
+      clientOptions: { theme: "light", lang: "en" },
+    });
+  });
+</script>
 <style>
 :root{
   --navy:#060c1a;
@@ -90,7 +102,15 @@ nav a:hover,nav a.active{color:var(--white);background:rgba(10,132,255,.15);}
 .live-dot2{width:7px;height:7px;background:#ff4444;border-radius:50%;animation:pulse2 1.2s infinite;}
 @keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,.5);}50%{box-shadow:0 0 0 6px rgba(255,68,68,0);}}
 .hero-live-label{font-size:1rem;font-weight:800;color:var(--silver2);letter-spacing:.04em;text-transform:uppercase;}
-.hero-ts{font-size:.75rem;color:var(--silver);font-variant-numeric:tabular-nums;}
+/* ── Digital Clock Widget ── */
+.clock-widget{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.clock-time{display:flex;align-items:center;gap:1px;font-family:'Courier New',monospace;line-height:1;}
+.clock-seg{font-size:1.18rem;font-weight:800;color:var(--blue2);letter-spacing:.04em;font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(0,198,255,.55);}
+.clock-colon{font-size:1.18rem;font-weight:800;color:rgba(0,198,255,.5);animation:colonBlink .9s step-end infinite;padding:0 1px;}
+@keyframes colonBlink{0%,100%{opacity:1;}50%{opacity:.15;}}
+.clock-secs{font-size:.68rem;font-weight:700;color:rgba(0,198,255,.55);letter-spacing:.06em;font-family:'Courier New',monospace;margin-left:2px;font-variant-numeric:tabular-nums;}
+.clock-date{font-size:.62rem;color:var(--silver);letter-spacing:.06em;text-transform:uppercase;opacity:.75;}
+.clock-tz{font-size:.58rem;color:rgba(0,198,255,.4);letter-spacing:.08em;margin-top:1px;}
 
 /* Trending slots */
 .trending-list{flex:1;display:flex;flex-direction:column;gap:0;}
@@ -343,14 +363,17 @@ footer{background:#030810;border-top:1px solid var(--border2);padding:40px 24px 
   </div>
 </header>
 
-<!-- HERO BANNER IMAGE -->
-<div style="width:100%;position:relative;display:block;line-height:0;">
-  <img src="/images/hero-banner.jpg"
-       alt="Trending Technology News – Real Time, Real News"
-       style="width:100%;height:auto;display:block;max-height:420px;object-fit:cover;object-position:center top;"
-       onerror="this.parentElement.style.display='none'">
-  <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(6,12,26,.25) 0%,transparent 25%,transparent 75%,rgba(6,12,26,.25) 100%);pointer-events:none;"></div>
-  <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,#060c1a 0%,transparent 100%);pointer-events:none;"></div>
+<!-- HERO BANNER -->
+<div style="width:100%;background:#060c1a;display:flex;justify-content:center;padding:18px 0 0;line-height:0;">
+  <div style="width:75%;max-width:1080px;position:relative;border-radius:12px;overflow:hidden;box-shadow:0 0 40px rgba(0,198,255,.12),0 0 80px rgba(10,132,255,.08);">
+    <img src="/images/hero-banner.png"
+         alt="Trending Technology News – Real Time, Real News"
+         style="width:100%;height:auto;display:block;"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div style="display:none;width:100%;height:160px;background:linear-gradient(135deg,#0a1a3a 0%,#060c1a 50%,#0a1a3a 100%);align-items:center;justify-content:center;flex-direction:column;gap:8px;border-radius:12px;border:1px dashed rgba(0,198,255,.2);">
+      <span style="color:rgba(0,198,255,.5);font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;">⚡ TechBrief — Real Time. Real News.</span>
+    </div>
+  </div>
 </div>
 
 <!-- HERO -->
@@ -367,7 +390,18 @@ footer{background:#030810;border-top:1px solid var(--border2);padding:40px 24px 
             <div class="live-badge"><div class="live-dot2"></div>Live</div>
             <span class="hero-live-label">Trending Technology News</span>
           </div>
-          <span class="hero-ts" id="live-clock"></span>
+          <div class="clock-widget">
+            <div class="clock-time">
+              <span class="clock-seg" id="clock-h"></span>
+              <span class="clock-colon">:</span>
+              <span class="clock-seg" id="clock-m"></span>
+              <span class="clock-colon">:</span>
+              <span class="clock-secs" id="clock-s"></span>
+              <span class="clock-secs" style="margin-left:5px;" id="clock-ampm"></span>
+            </div>
+            <div class="clock-date" id="clock-date"></div>
+            <div class="clock-tz" id="clock-tz"></div>
+          </div>
         </div>
         <div class="trending-list" id="trending-list"></div>
         <div class="hero-progress"><div class="hero-progress-bar" id="hero-progress-bar"></div></div>
@@ -688,10 +722,28 @@ function renderSideCards(stories){
     </a>`).join('');
 }
 
-// Clock
+// Digital Clock
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function pad2(n){return String(n).padStart(2,'0');}
 function updateClock(){
-  document.getElementById('live-clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const now=new Date();
+  let h=now.getHours(), ampm=h>=12?'PM':'AM';
+  h=h%12||12;
+  const m=now.getMinutes(), s=now.getSeconds();
+  const el=id=>document.getElementById(id);
+  if(el('clock-h'))   el('clock-h').textContent   = pad2(h);
+  if(el('clock-m'))   el('clock-m').textContent   = pad2(m);
+  if(el('clock-s'))   el('clock-s').textContent   = pad2(s);
+  if(el('clock-ampm'))el('clock-ampm').textContent= ampm;
+  if(el('clock-date'))el('clock-date').textContent=
+    DAYS[now.getDay()]+' · '+MONTHS[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+  if(el('clock-tz')){
+    const tz=(new Intl.DateTimeFormat().resolvedOptions().timeZone||'').replace('_',' ');
+    el('clock-tz').textContent='⏱ '+tz;
+  }
 }
+function id(x){return document.getElementById(x);}
 
 // Progress bar cycles every 60s to simulate "next update in..."
 let progressStart=Date.now();
@@ -771,6 +823,73 @@ function sendEnquiry(e){
   const subject=document.getElementById('c-subject').value||'General Enquiry';
   const msg=document.getElementById('c-msg').value;
   window.location.href='mailto:voltixio_editor@voltixio.com?subject='+encodeURIComponent(subject+' — from '+name)+'&body='+encodeURIComponent('From: '+name+'\nEmail: '+email+'\n\n'+msg);
+}
+</script>
+
+<!-- ── COOKIE CONSENT ─────────────────────────────────────────── -->
+<div id="cookie-popup" style="
+  position:fixed; bottom:24px; left:24px; z-index:9999;
+  background:#0d1526; border:1px solid rgba(0,198,255,.25);
+  border-radius:14px; padding:20px 22px; max-width:320px; width:calc(100vw - 48px);
+  box-shadow:0 8px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(0,198,255,.08);
+  animation:cookieSlideIn .35s cubic-bezier(.22,1,.36,1);
+  display:none;
+">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:1.3rem;">🍪</span>
+    <span style="color:#cdd9e8;font-size:.88rem;font-weight:700;letter-spacing:.02em;">Cookie Notice</span>
+  </div>
+  <p style="color:#a8bcd4;font-size:.8rem;line-height:1.65;margin:0 0 16px;">
+    TechBrief uses cookies for analytics and to improve your experience.
+    <a href="https://learnai.voltixio.com/privacy" target="_blank"
+       style="color:#00c6ff;text-decoration:underline;">Privacy Policy</a>
+  </p>
+  <div style="display:flex;gap:8px;">
+    <button onclick="cookieReject()" style="
+      flex:1; background:transparent; border:1px solid rgba(168,188,212,.2);
+      color:#a8bcd4; font-size:.75rem; font-weight:600; padding:8px 0;
+      border-radius:8px; cursor:pointer; letter-spacing:.03em; transition:all .2s;
+    " onmouseover="this.style.borderColor='rgba(168,188,212,.5)'"
+       onmouseout="this.style.borderColor='rgba(168,188,212,.2)'">
+      Reject
+    </button>
+    <button onclick="cookieAccept()" style="
+      flex:2; background:linear-gradient(135deg,#0a84ff,#00c6ff);
+      border:none; color:#fff; font-size:.75rem; font-weight:700;
+      padding:8px 0; border-radius:8px; cursor:pointer; letter-spacing:.03em;
+      box-shadow:0 4px 14px rgba(0,198,255,.3); transition:opacity .2s;
+    " onmouseover="this.style.opacity='.88'"
+       onmouseout="this.style.opacity='1'">
+      Accept All
+    </button>
+  </div>
+</div>
+
+<style>
+@keyframes cookieSlideIn{
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+</style>
+
+<script>
+(function(){
+  if(!localStorage.getItem('tb_cookie_consent')){
+    setTimeout(function(){
+      var p=document.getElementById('cookie-popup');
+      if(p) p.style.display='block';
+    },1200);
+  }
+})();
+function cookieAccept(){
+  localStorage.setItem('tb_cookie_consent','accepted');
+  var p=document.getElementById('cookie-popup');
+  if(p){p.style.opacity='0';p.style.transform='translateY(8px)';p.style.transition='all .3s';setTimeout(function(){p.style.display='none';},300);}
+}
+function cookieReject(){
+  localStorage.setItem('tb_cookie_consent','rejected');
+  var p=document.getElementById('cookie-popup');
+  if(p){p.style.opacity='0';p.style.transform='translateY(8px)';p.style.transition='all .3s';setTimeout(function(){p.style.display='none';},300);}
 }
 </script>
 </body>
