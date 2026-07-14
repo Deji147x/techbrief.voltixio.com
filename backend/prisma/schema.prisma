@@ -1,0 +1,81 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  url         String   @unique
+  source      String
+  rawContent  String?
+  imageUrl    String?
+  publishedAt DateTime
+
+  // AI-generated fields
+  aiProcessed  Boolean   @default(false)
+  aiSummary    String?
+  aiSimplified String?
+  aiLabel      String[] // canonical category enum — see REBUILD_SPEC.md section 1b
+  aiKeywords   String[]  @default([])
+  aiSentiment  String? // 'supporting' | 'opposing' | 'neutral' — stance framing, see section 2.4
+  processedAt  DateTime?
+
+  // Engagement
+  engagementScore Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([publishedAt])
+  @@index([aiLabel])
+}
+
+model TechBriefUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model EngagementEvent {
+  id        String   @id @default(uuid())
+  articleId String
+  userId    String?
+  visitorId String?
+  type      String // 'view' | 'read' | 'share'
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
+  @@index([visitorId])
+}
+
+// Anonymous visitor identity, set client-side (localStorage uuid) so behavior
+// and retention can be tracked without requiring signup/login.
+model Visitor {
+  id          String     @id
+  firstSeenAt DateTime   @default(now())
+  lastSeenAt  DateTime   @default(now())
+  visitCount  Int        @default(1)
+  pageViews   PageView[]
+
+  @@index([firstSeenAt])
+  @@index([lastSeenAt])
+}
+
+model PageView {
+  id        String   @id @default(uuid())
+  visitorId String
+  visitor   Visitor  @relation(fields: [visitorId], references: [id])
+  path      String
+  referrer  String?
+  createdAt DateTime @default(now())
+
+  @@index([visitorId])
+  @@index([createdAt])
+  @@index([path])
+}

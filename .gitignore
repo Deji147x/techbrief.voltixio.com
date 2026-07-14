@@ -18,7 +18,16 @@ venv/
 # Secrets / env
 .env
 .env.*
+!.env.example
+!.env.local.example
+!.env.production.example
 secrets.json
+
+# Node
+node_modules/
+.next/
+backend/dist/
+next-env.d.ts
 
 # OS
 .DS_Store
@@ -26,3 +35,4 @@ Thumbs.db
 
 # Logs
 *.log
+*.tsbuildinfo
