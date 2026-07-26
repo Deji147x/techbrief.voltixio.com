@@ -1,49 +1,71 @@
-# Deploying TechBrief
+# Tech Brief – One-Shot Deployment Guide
+Server: root@31.97.132.83
 
-Two independent pieces: the Next.js frontend on Vercel, and the backend
-(API + Postgres + Redis + Ollama) on a VPS via Docker Compose.
+---
 
-## Frontend (Vercel)
+## STEP 1 — Upload all files to server
 
-1. Import this repo into Vercel, set the project root to `apps/techbrief`.
-2. In the Vercel project's environment variables, set whatever `NEXT_PUBLIC_*`
-   values `apps/techbrief/.env.local` currently defines (check that file —
-   nothing else should be needed; the backend owns all secrets).
-3. Set `NEXT_PUBLIC_API_URL` (or whatever var points at the backend) to your
-   VPS's public backend URL, e.g. `https://api.yourdomain.com`.
-4. Push to `main` — Vercel auto-deploys from there once connected.
+Run from your Windows machine (PowerShell):
 
-## Backend (VPS + Docker Compose)
+```powershell
+$server = "root@31.97.132.83"
+$local  = "C:\Users\Parlevu_Global\OneDrive\Documents\Claude\Projects\Techbrief"
 
-Requires a VPS with at least 4 vCPU / 8GB RAM (gemma2:9b needs ~6GB resident;
-give the host headroom for Postgres/Redis/Node alongside it).
+scp "$local\generate_site.py"    "$server:/root/uglyfeed/"
+scp "$local\post_facebook.py"    "$server:/root/uglyfeed/"
+scp "$local\post_social.py"      "$server:/root/uglyfeed/"
+```
 
-1. SSH in, install Docker + Docker Compose plugin.
-2. `git clone` this repo, `cd` into it.
-3. Copy and fill in the two production env files (do NOT commit the filled versions):
-   ```
-   cp .env.production.example .env.production
-   cp backend/.env.production.example backend/.env.production
-   ```
-   Use the same Postgres user/password/db in both files.
-4. Set `CORS_ORIGIN` in `backend/.env.production` to your Vercel frontend's URL.
-5. Bring up the stack:
-   ```
-   docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
-   ```
-6. Pull the Ollama model once the `ollama` container is up:
-   ```
-   docker compose -f docker-compose.prod.yml exec ollama ollama pull gemma2:9b
-   ```
-7. Run migrations against the running Postgres:
-   ```
-   docker compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
-   ```
-8. Put a reverse proxy (Caddy or nginx) in front of port 4000 for TLS on your
-   API domain — this repo doesn't include one, so set it up directly on the VPS.
+## STEP 2 — Upload logo + hero banner
 
-## Updating
+Save your TB logo as `logo.png` in the Techbrief folder.
+Save the hero banner image as `hero-banner.jpg` in the Techbrief folder.
 
-Each new deploy: `git pull`, then
-`docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build`.
-Vercel redeploys the frontend automatically on push to `main`.
+```powershell
+scp "$local\logo.png"        "$server:/var/www/techbrief_static/images/logo.png"
+scp "$local\hero-banner.jpg" "$server:/var/www/techbrief_static/images/hero-banner.jpg"
+```
+
+---
+
+## STEP 3 — Install Python dependencies on server
+
+SSH in, then:
+
+```bash
+pip install feedparser jinja2 requests tweepy --break-system-packages
+```
+
+---
+
+## STEP 4 — Check uglyfeed sources via Streamlit
+
+Open http://31.97.132.83:8501 in your browser.
+Add these RSS feeds (copy from feeds.txt):
+- https://venturebeat.com/category/ai/feed/
+- https://feeds.arstechnica.com/arstechnica/index
+- https://feeds.feedburner.com/TheHackersNews
+- https://techcrunch.com/startups/feed/
+- (full list in feeds.txt)
+
+---
+
+## STEP 5 — Set environment variables (Facebook poster)
+
+```bash
+echo 'export FB_PAGE_TOKEN="EAAUlDXS...ZDZD"' >> /root/.bashrc
+echo 'export FB_PAGE_ID="YOUR_FACEBOOK_PAGE_ID"' >> /root/.bashrc
+source /root/.bashrc
+```
+
+---
+
+## STEP 6 — Test a manual build
+
+```bash
+cd /root/uglyfeed
+python3 generate_site.py
+```
+
+Expected output:
+```
